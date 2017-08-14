@@ -13,10 +13,12 @@ if ($method == 'POST') {
 			$response = [];
 			foreach ($m[1] as $temp) {
 				if ($temp[0] === "[") {
-					$response[]= "https://zh.wikipedia.org/wiki/".urlencode(substr($temp, 2, -2));
+					$prefix = "";
 				} else {
-					$response[]= "https://zh.wikipedia.org/wiki/Template:".urlencode(substr($temp, 2, -2));
+					$prefix = "Template:";
 				}
+				$page = substr($temp, 2, -2);
+				$response[]= "https://zh.wikipedia.org/wiki/".$prefix.urlencode(str_replace(" ", "_", $page));
 			}
 			$response = implode("\n", $response);
 			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.$response.'"';
