@@ -12,16 +12,25 @@ if ($method == 'POST') {
 		if (preg_match_all("/(\[\[.+?]]|{{.+?}})/", $text, $m)) {
 			$response = [];
 			foreach ($m[1] as $temp) {
-				if ($temp[0] === "[") {
+				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*]]$/", $temp, $m2)) {
 					$prefix = "";
-				} else {
+					$page = $m2[1];
+					if (isset($m2[2])) {
+						$section = "#".str_replace("%", ".", urlencode($m2[2]));
+					} else {
+						$section = "";
+					}
+				} else if (preg_match("/^{{(.+?)}}$/", $temp, $m2)) {
 					$prefix = "Template:";
+					$page = $m2[1];
+					$section = "";
+				} else {
+					continue;
 				}
-				$page = substr($temp, 2, -2);
-				$response[]= "https://zh.wikipedia.org/wiki/".$prefix.urlencode(str_replace(" ", "_", $page));
+				$response[]= "https://zh.wikipedia.org/wiki/".$prefix.str_replace(" ", "_", $page).$section;
 			}
 			$response = implode("\n", $response);
-			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.$response.'"';
+			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.urlencode($response).'"';
 			system($commend);
 		}
 	}
