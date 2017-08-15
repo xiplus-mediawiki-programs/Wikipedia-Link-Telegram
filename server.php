@@ -20,7 +20,7 @@ if ($method == 'POST') {
 					} else {
 						$section = "";
 					}
-				} else if (preg_match("/^{{(.+?)}}$/", $temp, $m2)) {
+				} else if (preg_match("/^{{([^|]+?)(?:|.+)?}}$/", $temp, $m2)) {
 					$prefix = "Template:";
 					$page = $m2[1];
 					$section = "";
