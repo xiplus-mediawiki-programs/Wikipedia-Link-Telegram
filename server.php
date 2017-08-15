@@ -20,6 +20,10 @@ if ($method == 'POST') {
 					} else {
 						$section = "";
 					}
+				} else if (preg_match("/^{{ *#(exer|if|ifeq|ifexist|ifexpr|switch|time|language|babel|invoke) *:/", $temp, $m2)) {
+					$prefix = "";
+					$page = "Help:解析器函数";
+					$section = "#".$m2[1];
 				} else if (preg_match("/^{{([^|]+)(?:|.+)?}}$/", $temp, $m2)) {
 					$prefix = "Template:";
 					$page = trim($m2[1]);
