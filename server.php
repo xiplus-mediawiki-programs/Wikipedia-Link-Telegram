@@ -24,7 +24,7 @@ if ($method == 'POST') {
 					$prefix = "";
 					$page = "Help:解析器函数";
 					$section = "#".$m2[1];
-				} else if (preg_match("/^{{([^|]+)(?:|.+)?}}$/", $temp, $m2)) {
+				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?([^|]+)(?:|.+)?}}$/", $temp, $m2)) {
 					$prefix = "Template:";
 					$page = trim($m2[1]);
 					$section = "";
