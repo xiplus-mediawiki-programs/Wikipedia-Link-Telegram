@@ -1,5 +1,12 @@
 <?php
 require_once(__DIR__.'/config/config.php');
+function section($section) {
+	if ($section === "") {
+		return "";
+	} else {
+		return "#".str_replace("%", ".", urlencode($section));
+	}
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 if ($method == 'POST') {
@@ -16,14 +23,14 @@ if ($method == 'POST') {
 					$prefix = "";
 					$page = trim($m2[1]);
 					if (isset($m2[2])) {
-						$section = "#".str_replace("%", ".", urlencode($m2[2]));
+						$section = $m2[2];
 					} else {
 						$section = "";
 					}
 				} else if (preg_match("/^{{ *#(exer|if|ifeq|ifexist|ifexpr|switch|time|language|babel|invoke) *:/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:解析器函数";
-					$section = "#".$m2[1];
+					$section = $m2[1];
 				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?([^|]+)(?:|.+)?}}$/", $temp, $m2)) {
 					$prefix = "Template:";
 					$page = trim($m2[1]);
@@ -31,7 +38,7 @@ if ($method == 'POST') {
 				} else {
 					continue;
 				}
-				$response[]= "https://zh.wikipedia.org/wiki/".$prefix.str_replace(" ", "_", $page).$section;
+				$response[]= "https://zh.wikipedia.org/wiki/".$prefix.str_replace(" ", "_", $page).section($section);
 			}
 			$response = implode("\n", $response);
 			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.urlencode($response).'"';
