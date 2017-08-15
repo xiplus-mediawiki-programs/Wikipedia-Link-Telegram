@@ -9,20 +9,20 @@ if ($method == 'POST') {
 	$data = file_get_contents("data/".$user_id.".json");
 	if (isset($input['message']['text'])) {
 		$text = $input['message']['text'];
-		if (preg_match_all("/(\[\[.+?]]|{{.+?}})/", $text, $m)) {
+		if (preg_match_all("/(\[\[([^\]])+?]]|{{([^}]+?)}})/", $text, $m)) {
 			$response = [];
 			foreach ($m[1] as $temp) {
-				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*]]$/", $temp, $m2)) {
+				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*?]]$/", $temp, $m2)) {
 					$prefix = "";
-					$page = $m2[1];
+					$page = trim($m2[1]);
 					if (isset($m2[2])) {
 						$section = "#".str_replace("%", ".", urlencode($m2[2]));
 					} else {
 						$section = "";
 					}
-				} else if (preg_match("/^{{([^|]+?)(?:|.+)?}}$/", $temp, $m2)) {
+				} else if (preg_match("/^{{([^|]+)(?:|.+)?}}$/", $temp, $m2)) {
 					$prefix = "Template:";
-					$page = $m2[1];
+					$page = trim($m2[1]);
 					$section = "";
 				} else {
 					continue;
