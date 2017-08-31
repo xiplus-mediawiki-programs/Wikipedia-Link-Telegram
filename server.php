@@ -30,13 +30,13 @@ if ($method == 'POST') {
 			$cmd = $temp[0];
 			unset($temp[0]);
 			$text = implode(" ", $temp);
-			if ($cmd === "/start") {
+			if (($user_id > 0 && $cmd === "/start") || $cmd === "/start@WikipediaLinkBot") {
 				$data["mode"] = "start";
 				$response = "已啟用連結回覆";
-			} else if ($cmd === "/stop") {
+			} else if (($user_id > 0 && $cmd === "/stop") || $cmd === "/stop@WikipediaLinkBot") {
 				$data["mode"] = "stop";
 				$response = "已停用連結回覆";
-			} else if ($cmd === "/optin") {
+			} else if (($user_id > 0 && $cmd === "/optin") || $cmd === "/optin@WikipediaLinkBot") {
 				if ($text === "") {
 					$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式才會回覆連結\n".
 						"範例：/optin /pattern/";
@@ -53,7 +53,7 @@ if ($method == 'POST') {
 						$response = "已啟用部分連結回覆：".$text;
 					}
 				}
-			} else if ($cmd === "/optout") {
+			} else if (($user_id > 0 && $cmd === "/optout") || $cmd === "/optout@WikipediaLinkBot") {
 				if ($text === "") {
 					$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式不會回覆連結\n".
 						"範例：/optout /pattern/";
@@ -70,7 +70,7 @@ if ($method == 'POST') {
 						$response = "已停用部分連結回覆：".$text;
 					}
 				}
-			} else if ($cmd === "/status") {
+			} else if (($user_id > 0 && $cmd === "/status") || $cmd === "/status@WikipediaLinkBot") {
 				$response = "現在連結回覆設定為".$data["mode"];
 				if (in_array($data["mode"], ["optin", "optout"])) {
 					$response .= "\n正規表達式：".$data["regex"]."";
