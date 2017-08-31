@@ -13,10 +13,80 @@ if ($method == 'POST') {
 	$inputJSON = file_get_contents('php://input');
 	$input = json_decode($inputJSON, true);
 	$user_id = $input['message']['chat']['id'];
-	$data = file_get_contents("data/".$user_id.".json");
+	if ($cfg['log']) {
+		file_put_contents(__DIR__."/data/".$user_id.".log", $inputJSON);
+	}
+	$datafile = __DIR__."/data/".$user_id."_setting.json";
+	$data = @file_get_contents($datafile);
+	if ($data === false) {
+		$data = ["mode" => "start"];
+	} else if (($data = json_decode($data, true)) === null) {
+		$data = ["mode" => "start"];
+	}
 	if (isset($input['message']['text'])) {
 		$text = $input['message']['text'];
-		if (preg_match_all("/(\[\[([^\]])+?]]|{{([^}]+?)}})/", $text, $m)) {
+		if (strpos($text, "/") === 0) {
+			$temp = explode(" ", $text);
+			$cmd = $temp[0];
+			unset($temp[0]);
+			$text = implode(" ", $temp);
+			if ($cmd === "/start") {
+				$data["mode"] = "start";
+				$response = "已啟用連結回覆";
+			} else if ($cmd === "/stop") {
+				$data["mode"] = "stop";
+				$response = "已停用連結回覆";
+			} else if ($cmd === "/optin") {
+				if ($text === "") {
+					$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式才會回覆連結\n".
+						"範例：/optin /pattern/";
+				} else {
+					if ($text[0] === "/" && substr($text, -1) === "/") {
+						$text = substr($text, 1, -1);
+					}
+					$text = "/".$text."/";
+					if (preg_match($text, null) === false) {
+						$response = "設定 /optin 的正規表達式包含錯誤，設定沒有改變";
+					} else {
+						$data["mode"] = "optin";
+						$data["regex"] = $text;
+						$response = "已啟用部分連結回覆：".$text;
+					}
+				}
+			} else if ($cmd === "/optout") {
+				if ($text === "") {
+					$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式不會回覆連結\n".
+						"範例：/optout /pattern/";
+				} else {
+					if ($text[0] === "/" && $text[-1] === "/") {
+						$text = substr($text, 0, -1);
+					}
+					$text = "/".$text."/";
+					if (preg_match($text, null) === false) {
+						$response = "設定 /optout 的正規表達式包含錯誤，設定沒有改變";
+					} else {
+						$data["mode"] = "optout";
+						$data["regex"] = $text;
+						$response = "已停用部分連結回覆：".$text;
+					}
+				}
+			} else if ($cmd === "/status") {
+				$response = "現在連結回覆設定為".$data["mode"];
+				if (in_array($data["mode"], ["optin", "optout"])) {
+					$response .= "\n正規表達式：".$data["regex"]."";
+				}
+			} else {
+				$response = "未知的指令";
+			}
+			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.urlencode($response).'"';
+			system($commend);
+		} else if ($data["mode"] == "stop") {
+
+		} else if ($data["mode"] == "optin" && !preg_match($data["regex"], $text)) {
+			
+		} else if ($data["mode"] == "optout" && preg_match($data["regex"], $text)) {
+
+		} else if (preg_match_all("/(\[\[([^\]])+?]]|{{([^}]+?)}})/", $text, $m)) {
 			$response = [];
 			foreach ($m[1] as $temp) {
 				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*?]]$/", $temp, $m2)) {
@@ -93,4 +163,5 @@ if ($method == 'POST') {
 			system($commend);
 		}
 	}
+	file_put_contents($datafile, json_encode($data));
 }
