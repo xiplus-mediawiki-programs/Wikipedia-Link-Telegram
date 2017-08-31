@@ -75,8 +75,6 @@ if ($method == 'POST') {
 				if (in_array($data["mode"], ["optin", "optout"])) {
 					$response .= "\n正規表達式：".$data["regex"]."";
 				}
-			} else {
-				$response = "未知的指令";
 			}
 			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.urlencode($response).'"';
 			system($commend);
