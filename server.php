@@ -19,9 +19,9 @@ if ($method == 'POST') {
 	$datafile = __DIR__."/data/".$user_id."_setting.json";
 	$data = @file_get_contents($datafile);
 	if ($data === false) {
-		$data = ["mode" => "start"];
+		$data = ["mode" => "start", "404" => false];
 	} else if (($data = json_decode($data, true)) === null) {
-		$data = ["mode" => "start"];
+		$data = ["mode" => "start", "404" => false];
 	}
 	if (isset($input['message']['text'])) {
 		$text = $input['message']['text'];
@@ -74,6 +74,13 @@ if ($method == 'POST') {
 				$response = "現在連結回覆設定為".$data["mode"];
 				if (in_array($data["mode"], ["optin", "optout"])) {
 					$response .= "\n正規表達式：".$data["regex"]."";
+				}
+			} else if (($user_id > 0 && $cmd === "/404") || $cmd === "/404@WikipediaLinkBot") {
+				$data["404"] = !$data["404"];
+				if ($data["404"]) {
+					$response = "已開啟頁面存在檢測（提醒：回應會稍慢）";
+				} else {
+					$response = "已關閉頁面存在檢測";
 				}
 			}
 			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.urlencode($response).'"';
@@ -154,12 +161,20 @@ if ($method == 'POST') {
 				} else {
 					continue;
 				}
-				$response[]= "https://zh.wikipedia.org/wiki/".$prefix.str_replace(" ", "_", $page).section($section);
+				$url = "https://zh.wikipedia.org/wiki/".$prefix.str_replace(" ", "_", $page).section($section);
+				$text = $url;
+				if ($data["404"]) {
+					$res = @file_get_contents($url);
+					if ($res === false) {
+						$text .= " (404)";
+					}
+				}
+				$response[]= $text;
 			}
 			$response = implode("\n", $response);
 			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.urlencode($response).'"';
 			system($commend);
 		}
+		file_put_contents($datafile, json_encode($data));
 	}
-	file_put_contents($datafile, json_encode($data));
 }
