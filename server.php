@@ -12,79 +12,121 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method == 'POST') {
 	$inputJSON = file_get_contents('php://input');
 	$input = json_decode($inputJSON, true);
-	$user_id = $input['message']['chat']['id'];
+	$chat_id = $input['message']['chat']['id'];
 	if ($cfg['log']) {
-		file_put_contents(__DIR__."/data/".$user_id.".log", $inputJSON);
+		file_put_contents(__DIR__."/data/".$chat_id.".log", $inputJSON);
 	}
-	$datafile = __DIR__."/data/".$user_id."_setting.json";
+	$datafile = __DIR__."/data/".$chat_id."_setting.json";
 	$data = @file_get_contents($datafile);
 	if ($data === false) {
-		$data = ["mode" => "start", "404" => false];
+		$data = ["mode" => "start", "404" => false, "cmdadminonly" => false];
 	} else if (($data = json_decode($data, true)) === null) {
-		$data = ["mode" => "start", "404" => false];
+		$data = ["mode" => "start", "404" => false, "cmdadminonly" => false];
 	}
 	if (isset($input['message']['text'])) {
 		$text = $input['message']['text'];
 		if (strpos($text, "/") === 0) {
+			$user_id = $input['message']['from']['id'];
+			$res = file_get_contents('https://api.telegram.org/bot'.$cfg['token'].'/getChatMember?chat_id='.$chat_id.'&user_id='.$user_id);
+			$res = json_decode($res, true);
+			$isadmin = in_array($res["result"]["status"], ["creator", "administrator"]);
 			$temp = explode(" ", $text);
 			$cmd = $temp[0];
 			unset($temp[0]);
 			$text = implode(" ", $temp);
-			if (($user_id > 0 && $cmd === "/start") || $cmd === "/start@WikipediaLinkBot") {
-				$data["mode"] = "start";
-				$response = "已啟用連結回覆";
-			} else if (($user_id > 0 && $cmd === "/stop") || $cmd === "/stop@WikipediaLinkBot") {
-				$data["mode"] = "stop";
-				$response = "已停用連結回覆";
-			} else if (($user_id > 0 && $cmd === "/optin") || $cmd === "/optin@WikipediaLinkBot") {
-				if ($text === "") {
+			$response = "";
+			if ($chat_id < 0 && $cmd === "/cmdadminonly@WikipediaLinkBot") {
+				if (!$isadmin) {
+					$response = "只有群組管理員可以變更此設定";
+				} else {
+					$data["cmdadminonly"] = !$data["cmdadminonly"];
+					if ($data["cmdadminonly"]) {
+						$response = "現在起只有群組管理員可以變更回覆設定";
+					} else {
+						$response = "現在起所有人都可以變更回覆設定";
+					}
+				}
+			} else if (($chat_id > 0 && $cmd === "/start") || $cmd === "/start@WikipediaLinkBot") {
+				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
+					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+				} else {
+					$data["mode"] = "start";
+					$response = "已啟用連結回覆";
+				}
+			} else if (($chat_id > 0 && $cmd === "/stop") || $cmd === "/stop@WikipediaLinkBot") {
+				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
+					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+				} else {
+					$data["mode"] = "stop";
+					$response = "已停用連結回覆";
+				}
+			} else if (($chat_id > 0 && $cmd === "/optin") || $cmd === "/optin@WikipediaLinkBot") {
+				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
+					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+				} else {
+					if ($text === "") {
 					$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式才會回覆連結\n".
 						"範例：/optin /pattern/";
-				} else {
-					if ($text[0] === "/" && substr($text, -1) === "/") {
-						$text = substr($text, 1, -1);
-					}
-					$text = "/".$text."/";
-					if (preg_match($text, null) === false) {
-						$response = "設定 /optin 的正規表達式包含錯誤，設定沒有改變";
 					} else {
-						$data["mode"] = "optin";
-						$data["regex"] = $text;
-						$response = "已啟用部分連結回覆：".$text;
+						if ($text[0] === "/" && substr($text, -1) === "/") {
+							$text = substr($text, 1, -1);
+						}
+						$text = "/".$text."/";
+						if (preg_match($text, null) === false) {
+							$response = "設定 /optin 的正規表達式包含錯誤，設定沒有改變";
+						} else {
+							$data["mode"] = "optin";
+							$data["regex"] = $text;
+							$response = "已啟用部分連結回覆：".$text;
+						}
 					}
 				}
-			} else if (($user_id > 0 && $cmd === "/optout") || $cmd === "/optout@WikipediaLinkBot") {
-				if ($text === "") {
-					$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式不會回覆連結\n".
-						"範例：/optout /pattern/";
+			} else if (($chat_id > 0 && $cmd === "/optout") || $cmd === "/optout@WikipediaLinkBot") {
+				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
+					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 				} else {
-					if ($text[0] === "/" && $text[-1] === "/") {
-						$text = substr($text, 0, -1);
-					}
-					$text = "/".$text."/";
-					if (preg_match($text, null) === false) {
-						$response = "設定 /optout 的正規表達式包含錯誤，設定沒有改變";
+					if ($text === "") {
+						$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式不會回覆連結\n".
+							"範例：/optout /pattern/";
 					} else {
-						$data["mode"] = "optout";
-						$data["regex"] = $text;
-						$response = "已停用部分連結回覆：".$text;
+						if ($text[0] === "/" && $text[-1] === "/") {
+							$text = substr($text, 0, -1);
+						}
+						$text = "/".$text."/";
+						if (preg_match($text, null) === false) {
+							$response = "設定 /optout 的正規表達式包含錯誤，設定沒有改變";
+						} else {
+							$data["mode"] = "optout";
+							$data["regex"] = $text;
+							$response = "已停用部分連結回覆：".$text;
+						}
 					}
 				}
-			} else if (($user_id > 0 && $cmd === "/status") || $cmd === "/status@WikipediaLinkBot") {
-				$response = "現在連結回覆設定為".$data["mode"];
-				if (in_array($data["mode"], ["optin", "optout"])) {
-					$response .= "\n正規表達式：".$data["regex"]."";
-				}
-			} else if (($user_id > 0 && $cmd === "/404") || $cmd === "/404@WikipediaLinkBot") {
-				$data["404"] = !$data["404"];
-				if ($data["404"]) {
-					$response = "已開啟頁面存在檢測（提醒：回應會稍慢）";
+			} else if (($chat_id > 0 && $cmd === "/status") || $cmd === "/status@WikipediaLinkBot") {
+				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
+					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 				} else {
-					$response = "已關閉頁面存在檢測";
+					$response = "現在連結回覆設定為".$data["mode"];
+					if (in_array($data["mode"], ["optin", "optout"])) {
+						$response .= "\n正規表達式：".$data["regex"]."";
+					}
+				}
+			} else if (($chat_id > 0 && $cmd === "/404") || $cmd === "/404@WikipediaLinkBot") {
+				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
+					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+				} else {
+					$data["404"] = !$data["404"];
+					if ($data["404"]) {
+						$response = "已開啟頁面存在檢測（提醒：回應會稍慢）";
+					} else {
+						$response = "已關閉頁面存在檢測";
+					}
 				}
 			}
-			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.urlencode($response).'"';
-			system($commend);
+			if ($response !== "") {
+				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode($response).'"';
+				system($commend);
+			}
 		} else if ($data["mode"] == "stop") {
 
 		} else if ($data["mode"] == "optin" && !preg_match($data["regex"], $text)) {
@@ -172,7 +214,7 @@ if ($method == 'POST') {
 				$response[]= $text;
 			}
 			$response = implode("\n", $response);
-			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$user_id.'&text='.urlencode($response).'"';
+			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode($response).'"';
 			system($commend);
 		}
 		file_put_contents($datafile, json_encode($data));
