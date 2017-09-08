@@ -19,9 +19,9 @@ if ($method == 'POST') {
 	$datafile = __DIR__."/data/".$chat_id."_setting.json";
 	$data = @file_get_contents($datafile);
 	if ($data === false) {
-		$data = ["mode" => "start", "404" => false, "cmdadminonly" => false];
+		$data = ["mode" => "start", "404" => false, "cmdadminonly" => false, "articlepath" => "https://zh.wikipedia.org/wiki/"];
 	} else if (($data = json_decode($data, true)) === null) {
-		$data = ["mode" => "start", "404" => false, "cmdadminonly" => false];
+		$data = ["mode" => "start", "404" => false, "cmdadminonly" => false, "articlepath" => "https://zh.wikipedia.org/wiki/"];
 	}
 	if (isset($input['message']['text'])) {
 		$text = $input['message']['text'];
@@ -65,7 +65,7 @@ if ($method == 'POST') {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 				} else {
 					if ($text === "") {
-					$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式才會回覆連結\n".
+						$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式才會回覆連結\n".
 						"範例：/optin /pattern/";
 					} else {
 						if ($text[0] === "/" && substr($text, -1) === "/") {
@@ -120,6 +120,23 @@ if ($method == 'POST') {
 						$response = "已開啟頁面存在檢測（提醒：回應會稍慢）";
 					} else {
 						$response = "已關閉頁面存在檢測";
+					}
+				}
+			} else if (($chat_id > 0 && $cmd === "/articlepath") || $cmd === "/articlepath@WikipediaLinkBot") {
+				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
+					$response = "只有群組管理員可以變更文章路徑\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+				} else {
+					if ($text === "") {
+						$response = "此指令需包含一個參數為文章路徑\n".
+						"範例：/articlepath https://zh.wikipedia.org/wiki/";
+					} else {
+						$res = file_get_contents($text);
+						if ($res === false) {
+							$response = "找不到網頁，請再次確認或稍後再試";
+						} else {
+							$data["articlepath"] = $text;
+							$response = "文章路徑已設定為 ".$text;
+						}
 					}
 				}
 			}
@@ -203,7 +220,7 @@ if ($method == 'POST') {
 				} else {
 					continue;
 				}
-				$url = "https://zh.wikipedia.org/wiki/".$prefix.str_replace(" ", "_", $page).section($section);
+				$url = $data["articlepath"].$prefix.str_replace(" ", "_", $page).section($section);
 				$text = $url;
 				if ($data["404"]) {
 					$res = @file_get_contents($url);
