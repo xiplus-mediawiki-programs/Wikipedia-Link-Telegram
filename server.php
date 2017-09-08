@@ -19,10 +19,11 @@ if ($method == 'POST') {
 	$datafile = __DIR__."/data/".$chat_id."_setting.json";
 	$data = @file_get_contents($datafile);
 	if ($data === false) {
-		$data = ["mode" => "start", "404" => false, "cmdadminonly" => false, "articlepath" => "https://zh.wikipedia.org/wiki/"];
+		$data = $cfg['defaultdata'];
 	} else if (($data = json_decode($data, true)) === null) {
-		$data = ["mode" => "start", "404" => false, "cmdadminonly" => false, "articlepath" => "https://zh.wikipedia.org/wiki/"];
+		$data = $cfg['defaultdata'];
 	}
+	$data += $cfg['defaultdata'];
 	if (isset($input['message']['text'])) {
 		$text = $input['message']['text'];
 		if (strpos($text, "/") === 0) {
