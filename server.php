@@ -131,12 +131,11 @@ if ($method == 'POST') {
 						$response = "此指令需包含一個參數為文章路徑\n".
 						"範例：/articlepath https://zh.wikipedia.org/wiki/";
 					} else {
+						$data["articlepath"] = $text;
+						$response = "文章路徑已設定為 ".$text;
 						$res = file_get_contents($text);
 						if ($res === false) {
-							$response = "找不到網頁，請再次確認或稍後再試";
-						} else {
-							$data["articlepath"] = $text;
-							$response = "文章路徑已設定為 ".$text;
+							$response .= "\n提醒：檢測到網頁可能不存在";
 						}
 					}
 				}
