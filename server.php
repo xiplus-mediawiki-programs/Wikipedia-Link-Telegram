@@ -156,6 +156,7 @@ if ($method == 'POST') {
 				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*?]]$/", $temp, $m2)) {
 					$prefix = "";
 					$page = trim($m2[1]);
+					$page = preg_replace("/^Special:AF/i", "Special:AbuseFilter", $page);
 					if (isset($m2[2])) {
 						$section = $m2[2];
 					} else {
