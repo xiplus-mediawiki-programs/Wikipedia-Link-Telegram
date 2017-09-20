@@ -153,9 +153,14 @@ if ($method == 'POST') {
 		} else if (preg_match_all("/(\[\[([^\]])+?]]|{{([^}]+?)}})/", $text, $m)) {
 			$response = [];
 			foreach ($m[1] as $temp) {
+				$articlepath = $data["articlepath"];
 				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*?]]$/", $temp, $m2)) {
 					$prefix = "";
 					$page = trim($m2[1]);
+					if (preg_match("/^:?moe:(.+)$/i", $page, $m3)) {
+						$articlepath = "https://zh.moegirl.org/";
+						$page = $m3[1];
+					}
 					$page = preg_replace("/^Special:AF/i", "Special:AbuseFilter", $page);
 					$page = preg_replace("/:$/i", "%3A", $page);
 					$page = preg_replace("/\?$/i", "%3F", $page);
@@ -223,7 +228,7 @@ if ($method == 'POST') {
 				} else {
 					continue;
 				}
-				$url = $data["articlepath"].$prefix.str_replace(" ", "_", $page).section($section);
+				$url = $articlepath.$prefix.str_replace(" ", "_", $page).section($section);
 				$text = $url;
 				if ($data["404"]) {
 					$res = @file_get_contents($url);
