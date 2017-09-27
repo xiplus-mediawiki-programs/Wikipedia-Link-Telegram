@@ -157,7 +157,7 @@ if ($method == 'POST') {
 				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*?]]$/", $temp, $m2)) {
 					$prefix = "";
 					$page = trim($m2[1]);
-					if (preg_match("/^:?moe:(.+)$/i", $page, $m3)) {
+					if (preg_match("/^:?moe:(.*)$/i", $page, $m3)) {
 						$articlepath = "https://zh.moegirl.org/";
 						$page = $m3[1];
 					}
