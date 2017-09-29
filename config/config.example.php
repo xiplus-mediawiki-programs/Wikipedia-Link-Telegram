@@ -7,6 +7,8 @@ $cfg['defaultdata'] = [
 	"mode" => "start",
 	"404" => false,
 	"cmdadminonly" => false,
-	"articlepath" => "https://zh.wikipedia.org/wiki/"
+	"articlepath" => "https://zh.wikipedia.org/wiki/",
+	"lastuse" => time()
 ];
 $cfg['stoplimit'] = 86400 * 7;
+$cfg['unusedlimit'] = 86400 * 7;

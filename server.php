@@ -165,6 +165,7 @@ if ($method == 'POST') {
 		} else if ($data["mode"] == "optout" && preg_match($data["regex"], $text)) {
 
 		} else if (preg_match_all("/(\[\[([^\]])+?]]|{{([^}]+?)}})/", $text, $m)) {
+			$data["lastuse"] = time();
 			$response = [];
 			foreach ($m[1] as $temp) {
 				$articlepath = $data["articlepath"];
@@ -255,6 +256,13 @@ if ($method == 'POST') {
 			$response = implode("\n", $response);
 			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode($response).'"';
 			system($commend);
+		} else {
+			if (time() - $data["lastuse"] > $cfg['unusedlimit']) {
+				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("機器人發現已經".$cfg['unusedlimit']."秒沒有被使用了，因此將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
+				system($commend);
+				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
+				system($commend);
+			}
 		}
 		file_put_contents($datafile, json_encode($data));
 	}
