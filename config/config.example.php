@@ -9,3 +9,4 @@ $cfg['defaultdata'] = [
 	"cmdadminonly" => false,
 	"articlepath" => "https://zh.wikipedia.org/wiki/"
 ];
+$cfg['stoplimit'] = 86400 * 7;

@@ -57,6 +57,12 @@ if ($method == 'POST') {
 			} else if (($chat_id > 0 && $cmd === "/stop") || $cmd === "/stop@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+				} else if ($chat_id < 0) {
+					if ($data["mode"] !== "stop") {
+						$data["stoptime"] = time();
+					}
+					$data["mode"] = "stop";
+					$response = "已停用連結回覆\n機器人將會在".($cfg['stoplimit']-(time()-$data["stoptime"]))."秒後自動退出";
 				} else {
 					$data["mode"] = "stop";
 					$response = "已停用連結回覆";
@@ -145,7 +151,15 @@ if ($method == 'POST') {
 				system($commend);
 			}
 		} else if ($data["mode"] == "stop") {
-
+			if (!isset($data["stoptime"])) {
+				$data["stoptime"] = time();
+			}
+			if (time() - $data["stoptime"] > $cfg['stoplimit']) {
+				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("因為停用回覆過久，機器人將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
+				system($commend);
+				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
+				system($commend);
+			}
 		} else if ($data["mode"] == "optin" && !preg_match($data["regex"], $text)) {
 			
 		} else if ($data["mode"] == "optout" && preg_match($data["regex"], $text)) {
