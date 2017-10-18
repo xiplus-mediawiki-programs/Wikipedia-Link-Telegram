@@ -2,6 +2,7 @@
 
 $cfg['token'] = 'token';
 $cfg['webhook'] = 'webhook_url';
+$cfg['bot_username'] = 'WikipediaLinkBot';
 $cfg['log'] = false;
 $cfg['defaultdata'] = [
 	"mode" => "start",

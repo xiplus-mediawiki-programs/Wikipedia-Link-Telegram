@@ -265,5 +265,13 @@ if ($method == 'POST') {
 			}
 		}
 		file_put_contents($datafile, json_encode($data));
+	} else if (isset($input['message']['new_chat_member'])) {
+		if ($input['message']['new_chat_member']['username'] == $cfg['bot_username']) {
+			$data["lastuse"] = time();
+			$data["stoptime"] = time();
+			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("感謝您使用本機器人，當您輸入[[頁面名]]或{{模板名}}時，機器人將會自動回覆連結").'"';
+			system($commend);
+			file_put_contents($datafile, json_encode($data));
+		}
 	}
 }
