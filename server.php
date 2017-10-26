@@ -164,7 +164,7 @@ if ($method == 'POST') {
 			
 		} else if ($data["mode"] == "optout" && preg_match($data["regex"], $text)) {
 
-		} else if (preg_match_all("/(\[\[([^\]])+?]]|{{([^}]+?)}})/", $text, $m)) {
+		} else if (preg_match_all("/(\[\[([^\[\]])+?]]|{{([^{}]+?)}})/", $text, $m)) {
 			$data["lastuse"] = time();
 			$response = [];
 			foreach ($m[1] as $temp) {
