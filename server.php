@@ -175,6 +175,12 @@ if ($method == 'POST') {
 					if (preg_match("/^:?moe:(.*)$/i", $page, $m3)) {
 						$articlepath = "https://zh.moegirl.org/";
 						$page = $m3[1];
+					} else if (preg_match("/^:?unct?:(.*)$/i", $page, $m3)) {
+						$articlepath = "http://uncyclopedia.tw/wiki/";
+						$page = $m3[1];
+					} else if (preg_match("/^:?uncc:(.*)$/i", $page, $m3)) {
+						$articlepath = "http://cn.uncyclopedia.wikia.com/wiki/";
+						$page = $m3[1];
 					}
 					$page = preg_replace("/^Special:AF/i", "Special:AbuseFilter", $page);
 					$page = preg_replace("/:$/i", "%3A", $page);
