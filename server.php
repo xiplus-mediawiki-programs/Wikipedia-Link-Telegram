@@ -4,7 +4,7 @@ function section($section) {
 	if ($section === "") {
 		return "";
 	} else {
-		return "#".str_replace("%", ".", urlencode($section));
+		return "#".str_replace(["%3A", "%"], [":", "."], urlencode($section));
 	}
 }
 
