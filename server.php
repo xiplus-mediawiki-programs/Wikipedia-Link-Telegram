@@ -175,6 +175,9 @@ if ($method == 'POST') {
 					if (preg_match("/^:?moe:(.*)$/i", $page, $m3)) {
 						$articlepath = "https://zh.moegirl.org/";
 						$page = $m3[1];
+					} else if (preg_match("/^:?kom?:(.*)$/i", $page, $m3)) {
+						$articlepath = "https://wiki.komica.org/";
+						$page = $m3[1];
 					} else if (preg_match("/^:?unct?:(.*)$/i", $page, $m3)) {
 						$articlepath = "http://uncyclopedia.tw/wiki/";
 						$page = $m3[1];
