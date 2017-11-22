@@ -187,6 +187,7 @@ if ($method == 'POST') {
 					}
 					$page = preg_replace("/^Special:AF/i", "Special:AbuseFilter", $page);
 					$page = preg_replace("/:$/i", "%3A", $page);
+					$page = preg_replace("/!$/i", "%21", $page);
 					$page = preg_replace("/\?$/i", "%3F", $page);
 					if (isset($m2[2])) {
 						$section = $m2[2];
