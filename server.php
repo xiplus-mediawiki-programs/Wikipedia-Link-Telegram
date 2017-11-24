@@ -24,8 +24,14 @@ if ($method == 'POST') {
 		$data = $cfg['defaultdata'];
 	}
 	$data += $cfg['defaultdata'];
-	if (isset($input['message']['text'])) {
-		$text = $input['message']['text'];
+	if (isset($input['message']['text']) || isset($input['message']['caption'])) {
+		if (isset($input['message']['text'])) {
+			$text = $input['message']['text'];
+		} else if (isset($input['message']['caption'])) {
+			$text = $input['message']['caption'];
+		} else {
+			$text = "";
+		}
 		if (strpos($text, "/") === 0) {
 			$user_id = $input['message']['from']['id'];
 			$res = file_get_contents('https://api.telegram.org/bot'.$cfg['token'].'/getChatMember?chat_id='.$chat_id.'&user_id='.$user_id);
