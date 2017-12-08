@@ -124,6 +124,7 @@ if ($method == 'POST') {
 					if (in_array($data["mode"], ["optin", "optout"])) {
 						$response .= "\n正規表達式：".$data["regex"]."";
 					}
+					$response .= "\n頁面存在檢測為".($data["404"]?"開啟":"關閉");
 				}
 			} else if (($chat_id > 0 && $cmd === "/404") || $cmd === "/404@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
@@ -183,7 +184,7 @@ if ($method == 'POST') {
 				}
 			}
 			if ($response !== "") {
-				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode($response).'"';
+				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&text='.urlencode($response).'"';
 				system($commend);
 			}
 		} else if ($data["mode"] == "stop") {
@@ -300,7 +301,7 @@ if ($method == 'POST') {
 				$response[]= $text;
 			}
 			$response = implode("\n", $response);
-			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode($response).'"';
+			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&text='.urlencode($response).'"';
 			system($commend);
 		} else {
 			if (time() - $data["lastuse"] > $cfg['unusedlimit']) {
