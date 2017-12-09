@@ -165,19 +165,19 @@ if ($method == 'POST') {
 					} else {
 						$res = str_replace("\n", "", $res);
 						$response = $text[0]."@".$text[1];
-						if (preg_match("/<td>User groups<\/td>\s*<td>(.+?)<\/td>/", $res, $m)) {
+						if (preg_match("/<td>User groups<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n權限：".trim($m[1]);
 						}
-						if (preg_match("/<td>Global user groups<\/td>\s*<td>(.+?)<\/td>/", $res, $m)) {
+						if (preg_match("/<td>Global user groups<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n全域權限：".trim($m[1]);
 						}
-						if (preg_match("/<td>Total<\/td>\s*<td>(.+?)<\/td>/", $res, $m)) {
+						if (preg_match("/<td>Total<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n總計：".trim($m[1]);
 						}
-						if (preg_match("/<td>Live edits<\/td>\s*<td>(.+?)<\/td>/", $res, $m)) {
+						if (preg_match("/<td>Live edits<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n可見編輯：".trim($m[1]);
 						}
-						if (preg_match("/<td>Deleted edits<\/td>\s*<td>(.+?)<\/td>/", $res, $m)) {
+						if (preg_match("/<td>Deleted edits<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n已刪編輯：".trim($m[1]);
 						}
 					}
