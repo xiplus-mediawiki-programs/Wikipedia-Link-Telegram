@@ -161,24 +161,33 @@ if ($method == 'POST') {
 				} else {
 					$res = file_get_contents("https://xtools.wmflabs.org/sc/".$text[1]."/".$text[0]."?uselang=en");
 					if ($res === false) {
-						$response = "用戶名或Wiki不存在，或連線發生錯誤";
+						$response = "連線發生錯誤";
 					} else {
 						$res = str_replace("\n", "", $res);
 						$response = $text[0]."@".$text[1];
+						$get = false;
 						if (preg_match("/<td>User groups<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n權限：".trim($m[1]);
+							$get = true;
 						}
 						if (preg_match("/<td>Global user groups<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n全域權限：".trim($m[1]);
+							$get = true;
 						}
 						if (preg_match("/<td>Total<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n總計：".trim($m[1]);
+							$get = true;
 						}
 						if (preg_match("/<td>Live edits<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n可見編輯：".trim($m[1]);
+							$get = true;
 						}
 						if (preg_match("/<td>Deleted edits<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
 							$response .= "\n已刪編輯：".trim($m[1]);
+							$get = true;
+						}
+						if (!$get) {
+							$response = "用戶名或Wiki不存在";
 						}
 					}
 				}
