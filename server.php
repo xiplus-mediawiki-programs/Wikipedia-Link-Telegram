@@ -116,16 +116,17 @@ if ($method == 'POST') {
 						}
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/status") || $cmd === "/status@WikipediaLinkBot") {
-				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
-					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
-				} else {
-					$response = "現在連結回覆設定為".$data["mode"];
-					if (in_array($data["mode"], ["optin", "optout"])) {
-						$response .= "\n正規表達式：".$data["regex"]."";
-					}
-					$response .= "\n頁面存在檢測為".($data["404"]?"開啟":"關閉");
+			} else if (($chat_id > 0 && $cmd === "/settings") || $cmd === "/settings@WikipediaLinkBot") {
+				$response = "現在連結回覆設定為".$data["mode"];
+				if (in_array($data["mode"], ["optin", "optout"])) {
+					$response .= "\n正規表達式：".$data["regex"]."";
 				}
+				$response .= "\n頁面存在檢測為".($data["404"]?"開啟":"關閉");
+				$response .= "\n文章路徑為 ".$data["articlepath"];
+				if ($chat_id < 0) {
+					$response .= "\n".($data["cmdadminonly"]?"只有管理員可以變更回覆設定":"所有人都可以變更回覆設定");
+				}
+				$response .= "\n使用 /help 查看更改設定的指令";
 			} else if (($chat_id > 0 && $cmd === "/404") || $cmd === "/404@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
@@ -152,6 +153,17 @@ if ($method == 'POST') {
 							$response .= "\n提醒：檢測到網頁可能不存在";
 						}
 					}
+				}
+			} else if (($chat_id > 0 && $cmd === "/help") || $cmd === "/help@WikipediaLinkBot") {
+				$response = "/settings 檢視連結回覆設定\n".
+					"/start 啟用所有連結回覆\n".
+					"/stop 停用所有連結回覆\n".
+					"/optin 啟用部分連結回覆(參數設定，使用正規表達式)\n".
+					"/optout 停用部分連結回覆(參數設定，使用正規表達式)\n".
+					"/404 檢測頁面存在(開啟時回應會較慢)\n".
+					"/articlepath 變更文章路徑\n";
+				if ($chat_id < 0) {
+					$response .= "/cmdadminonly 調整是否只有管理員才可變更設定\n";
 				}
 			} else if (($chat_id > 0 && $cmd === "/editcount") || $cmd === "/editcount@WikipediaLinkBot") {
 				$text = trim($text);
