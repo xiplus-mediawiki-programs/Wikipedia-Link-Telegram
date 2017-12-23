@@ -38,6 +38,7 @@ if ($method == 'POST') {
 			$res = json_decode($res, true);
 			$isadmin = in_array($res["result"]["status"], ["creator", "administrator"]);
 			$text = str_replace("\n", " ", $text);
+			$text = preg_replace("/^([^ ]+) +/", "$1 ", $text);
 			$temp = explode(" ", $text);
 			$cmd = $temp[0];
 			unset($temp[0]);
