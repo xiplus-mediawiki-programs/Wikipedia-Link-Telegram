@@ -246,6 +246,15 @@ if ($method == 'POST') {
 					} else if (preg_match("/^:?uncc:(.*)$/i", $page, $m3)) {
 						$articlepath = "http://cn.uncyclopedia.wikia.com/wiki/";
 						$page = $m3[1];
+					} else if (preg_match("/^:?abf:(.*)$/i", $page, $m3)) {
+						$articlepath = "https://zh.wikipedia.org/wiki/Special:AbuseFilter/";
+						$page = $m3[1];
+					} else if (preg_match("/^:?(?:cpb|ctext):(.*)$/i", $page, $m3)) {
+						$articlepath = "http://ctext.org/dictionary.pl?if=gb&char=";
+						$page = $m3[1];
+					} else if (preg_match("/^:?(?:cpba|ctexta):(.*)$/i", $page, $m3)) {
+						$articlepath = "http://ctext.org/searchbooks.pl?if=gb&author=";
+						$page = $m3[1];
 					}
 					$page = preg_replace("/^Special:AF/i", "Special:AbuseFilter", $page);
 					$page = preg_replace("/:$/i", "%3A", $page);
