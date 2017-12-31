@@ -13,3 +13,6 @@ $cfg['defaultdata'] = [
 ];
 $cfg['stoplimit'] = 86400 * 7;
 $cfg['unusedlimit'] = 86400 * 7;
+$cfg['noautoleavelist'] = [
+	'chat_id'
+];
