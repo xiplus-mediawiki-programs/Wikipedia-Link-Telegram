@@ -334,8 +334,12 @@ if ($method == 'POST') {
 				}
 				$response[]= $text;
 			}
-			$response = implode("\n", $response);
-			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&text='.urlencode($response).'"';
+			$responsetext = implode("\n", $response);
+			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "'.
+				'chat_id='.$chat_id.'&'.
+				'reply_to_message_id='.$input['message']['message_id'].'&'.
+				(count($response)>1 ? 'disable_web_page_preview=1&' : '').
+				'text='.urlencode($responsetext).'"';
 			system($commend);
 		} else {
 			if (time() - $data["lastuse"] > $cfg['unusedlimit'] && !in_array($chat_id, $cfg['noautoleavelist'])) {
