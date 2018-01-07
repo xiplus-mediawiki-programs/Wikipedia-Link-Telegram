@@ -126,6 +126,7 @@ if ($method == 'POST') {
 					$response .= "\n正規表達式：".$data["regex"]."";
 				}
 				$response .= "\n頁面存在檢測為".($data["404"]?"開啟":"關閉");
+				$response .= "\n連結預覽為".($data["pagepreview"]?"開啟":"關閉");
 				$response .= "\n文章路徑為 ".$data["articlepath"];
 				if ($chat_id < 0) {
 					$response .= "\n".($data["cmdadminonly"]?"只有管理員可以變更回覆設定":"所有人都可以變更回覆設定");
@@ -140,6 +141,17 @@ if ($method == 'POST') {
 						$response = "已開啟頁面存在檢測（提醒：回應會稍慢）";
 					} else {
 						$response = "已關閉頁面存在檢測";
+					}
+				}
+			} else if (($chat_id > 0 && $cmd === "/pagepreview") || $cmd === "/pagepreview@WikipediaLinkBot") {
+				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
+					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+				} else {
+					$data["pagepreview"] = !$data["pagepreview"];
+					if ($data["pagepreview"]) {
+						$response = "已開啟連結預覽（提醒：僅有一個連結時會預覽）";
+					} else {
+						$response = "已關閉連結預覽";
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/articlepath") || $cmd === "/articlepath@WikipediaLinkBot") {
@@ -165,6 +177,7 @@ if ($method == 'POST') {
 					"/optin 啟用部分連結回覆(參數設定，使用正規表達式)\n".
 					"/optout 停用部分連結回覆(參數設定，使用正規表達式)\n".
 					"/404 檢測頁面存在(開啟時回應會較慢)\n".
+					"/pagepreview 連結預覽(僅有一個連結時會預覽)\n".
 					"/articlepath 變更文章路徑\n";
 				if ($chat_id < 0) {
 					$response .= "/cmdadminonly 調整是否只有管理員才可變更設定\n";
@@ -209,7 +222,7 @@ if ($method == 'POST') {
 				}
 			}
 			if ($response !== "") {
-				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&text='.urlencode($response).'"';
+				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&disable_web_page_preview=1&text='.urlencode($response).'"';
 				system($commend);
 			}
 		} else if ($data["mode"] == "stop") {
@@ -338,7 +351,7 @@ if ($method == 'POST') {
 			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "'.
 				'chat_id='.$chat_id.'&'.
 				'reply_to_message_id='.$input['message']['message_id'].'&'.
-				(count($response)>1 ? 'disable_web_page_preview=1&' : '').
+				(count($response)>1||!$data["pagepreview"] ? 'disable_web_page_preview=1&' : '').
 				'text='.urlencode($responsetext).'"';
 			system($commend);
 		} else {

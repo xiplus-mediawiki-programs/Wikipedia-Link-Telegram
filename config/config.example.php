@@ -7,6 +7,7 @@ $cfg['log'] = false;
 $cfg['defaultdata'] = [
 	"mode" => "start",
 	"404" => false,
+	"pagepreview" => true,
 	"cmdadminonly" => false,
 	"articlepath" => "https://zh.wikipedia.org/wiki/",
 	"lastuse" => time()
