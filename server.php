@@ -107,8 +107,8 @@ if ($method == 'POST') {
 						$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式不會回覆連結\n".
 							"範例：/optout /pattern/";
 					} else {
-						if ($text[0] === "/" && $text[-1] === "/") {
-							$text = substr($text, 0, -1);
+						if ($text[0] === "/" && substr($text, -1) === "/") {
+							$text = substr($text, 1, -1);
 						}
 						$text = "/".$text."/";
 						if (preg_match($text, null) === false) {
