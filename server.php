@@ -121,7 +121,8 @@ if ($method == 'POST') {
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/settings") || $cmd === "/settings@WikipediaLinkBot") {
-				$response = "現在連結回覆設定為".$data["mode"];
+				$response = "chat id為".$chat_id.(in_array($chat_id, $cfg['noautoleavelist'])?"（不退出白名單）":"");
+				$response .= "\n連結回覆設定為".$data["mode"];
 				if (in_array($data["mode"], ["optin", "optout"])) {
 					$response .= "\n正規表達式：".$data["regex"]."";
 				}
