@@ -268,6 +268,9 @@ if ($method == 'POST') {
 					} else if (preg_match("/^:?(?:cpba|ctexta):(.*)$/i", $page, $m3)) {
 						$articlepath = "http://ctext.org/searchbooks.pl?if=gb&author=";
 						$page = $m3[1];
+					} else if (preg_match("/^:?mc:(.*)$/i", $page, $m3)) {
+						$articlepath = "https://minecraft-zh.gamepedia.com/";
+						$page = $m3[1];
 					}
 					$page = preg_replace("/^Special:AF/i", "Special:AbuseFilter", $page);
 					$page = preg_replace("/:$/i", "%3A", $page);
