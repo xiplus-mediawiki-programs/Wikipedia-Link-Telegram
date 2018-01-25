@@ -189,31 +189,39 @@ if ($method == 'POST') {
 				if (count($text) !== 2 || trim($text[0]) === "" || trim($text[1]) === "") {
 					$response = "格式錯誤，必須為 Username@Wiki";
 				} else {
-					$res = file_get_contents("https://xtools.wmflabs.org/sc/".$text[1]."/".$text[0]."?uselang=en");
+					$res = file_get_contents("https://xtools.wmflabs.org/ec/".$text[1]."/".$text[0]."?uselang=en");
 					if ($res === false) {
 						$response = "連線發生錯誤";
 					} else {
 						$res = str_replace("\n", "", $res);
 						$response = $text[0]."@".$text[1];
 						$get = false;
-						if (preg_match("/<td>User groups<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
-							$response .= "\n權限：".trim($m[1]);
+						if (preg_match("/User groups<\/a><\/td>\s*<td>\s*(.*?)\s*<\/td>/", $res, $m)) {
+							$response .= "\n權限：".preg_replace("/\s{2,}/", " ", trim($m[1]));
 							$get = true;
 						}
-						if (preg_match("/<td>Global user groups<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
-							$response .= "\n全域權限：".trim($m[1]);
+						if (preg_match("/Global user groups<\/td>\s*<td>\s*(.*?)\s*<\/td>/", $res, $m)) {
+							$response .= "\n全域權限：".preg_replace("/\s{2,}/", " ", trim($m[1]));
 							$get = true;
 						}
-						if (preg_match("/<td>Total<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
+						if (preg_match('/Total edits<\/strong><\/td>\s*<td class="xt-test--total-edits"><strong>(.*?)<\/strong>/', $res, $m)) {
 							$response .= "\n總計：".trim($m[1]);
 							$get = true;
 						}
-						if (preg_match("/<td>Live edits<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
+						if (preg_match('/Live edits<\/td>\s*<td class="stat-list--new-group">\s*<a[^>]+>(.*?)<\/a>/', $res, $m)) {
 							$response .= "\n可見編輯：".trim($m[1]);
 							$get = true;
 						}
-						if (preg_match("/<td>Deleted edits<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
+						if (preg_match("/Deleted edits<\/td>\s*<td>\s*<a[^>]+>(.*?)<\/a>/", $res, $m)) {
 							$response .= "\n已刪編輯：".trim($m[1]);
+							$get = true;
+						}
+						if (preg_match("/Edits in the past 24 hours<\/td><td>(.+?)<\/td>/", $res, $m)) {
+							$response .= "\n24小時內編輯：".trim($m[1]);
+							$get = true;
+						}
+						if (preg_match("/Edits in the past 7 days<\/td><td>(.+?)<\/td>/", $res, $m)) {
+							$response .= "\n7天內編輯：".trim($m[1]);
 							$get = true;
 						}
 						if (!$get) {
