@@ -346,7 +346,7 @@ if ($method == 'POST') {
 				if ($data["404"]) {
 					$res = @file_get_contents($url);
 					if ($res === false) {
-						$text .= " (404)";
+						$text .= " (404，<a href='".$articlepath."Special:Search?search=".urlencode($page)."'>搜尋</a>)";
 					}
 				}
 				$response[]= $text;
@@ -356,6 +356,7 @@ if ($method == 'POST') {
 				'chat_id='.$chat_id.'&'.
 				'reply_to_message_id='.$input['message']['message_id'].'&'.
 				(count($response)>1||!$data["pagepreview"] ? 'disable_web_page_preview=1&' : '').
+				'parse_mode=HTML&'.
 				'text='.urlencode($responsetext).'"';
 			system($commend);
 		} else {
