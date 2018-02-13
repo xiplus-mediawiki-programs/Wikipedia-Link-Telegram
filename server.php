@@ -1,12 +1,6 @@
 <?php
 require_once(__DIR__.'/config/config.php');
-function section($section) {
-	if ($section === "") {
-		return "";
-	} else {
-		return "#".str_replace(["%3A", "%"], [":", "."], urlencode($section));
-	}
-}
+require_once($cfg['module']['mediawikiurlencode']);
 
 $method = $_SERVER['REQUEST_METHOD'];
 if ($method == 'POST') {
@@ -349,7 +343,7 @@ if ($method == 'POST') {
 				} else {
 					continue;
 				}
-				$url = $articlepath.$prefix.str_replace(" ", "_", $page).section($section);
+				$url = mediawikiurlencode($articlepath, $prefix.$page, $section);
 				$text = $url;
 				if ($data["404"]) {
 					$res = @file_get_contents($url);

@@ -17,3 +17,5 @@ $cfg['unusedlimit'] = 86400 * 7;
 $cfg['noautoleavelist'] = [
 	'chat_id'
 ];
+
+$cfg['module']['mediawikiurlencode'] = __DIR__.'/function/Mediawiki-urlencode/mediawikiurlencode.php';

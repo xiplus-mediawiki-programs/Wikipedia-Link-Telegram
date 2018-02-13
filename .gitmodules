@@ -1,0 +1,3 @@
+[submodule "function/Mediawiki-urlencode"]
+	path = function/Mediawiki-urlencode
+	url = https://github.com/Xi-Plus/Mediawiki-urlencode.git
