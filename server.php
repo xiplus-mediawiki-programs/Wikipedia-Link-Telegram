@@ -183,21 +183,23 @@ if ($method == 'POST') {
 				if (count($text) !== 2 || trim($text[0]) === "" || trim($text[1]) === "") {
 					$response = "格式錯誤，必須為 Username@Wiki";
 				} else {
-					$res = file_get_contents("https://xtools.wmflabs.org/ec/".$text[1]."/".$text[0]."?uselang=en");
+					$text[0] = ucfirst($text[0]);
+					$url = "https://xtools.wmflabs.org/ec/".$text[1]."/".urlencode($text[0])."?uselang=en";
+					$res = file_get_contents($url);
 					if ($res === false) {
 						$response = "連線發生錯誤";
 					} else {
 						$res = str_replace("\n", "", $res);
 						$res = html_entity_decode($res);
 						$response = '<a href="'.mediawikiurlencode("https://meta.wikimedia.org/wiki/", "Special:CentralAuth/".$text[0]).'">'.$text[0].'</a>'.
-							"@".$text[1];
+							"@".$text[1].'（<a href="'.$url.'">檢查</a>）';
 						$get = false;
 						file_put_contents(__DIR__."/data/".$text[0].".html", $res);
 						if (preg_match("/User groups.*?<\/td>\s*<td>\s*(.*?)\s*<\/td>/", $res, $m)) {
 							$response .= "\n權限：".preg_replace("/\s{2,}/", " ", trim($m[1]));
 							$get = true;
 						}
-						if (preg_match("/Global user groups<\/td>\s*<td>\s*(.*?)\s*<\/td>|<td>Global user groups<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
+						if (preg_match("/Global user groups<\/td>\s*<td>\s*(.*?)\s*<\/td>/", $res, $m)) {
 							$response .= "\n全域權限：".preg_replace("/\s{2,}/", " ", trim($m[1]));
 							$get = true;
 						}
@@ -222,7 +224,7 @@ if ($method == 'POST') {
 							$get = true;
 						}
 						if (!$get) {
-							$response = "用戶名或Wiki不存在";
+							$response = '用戶名或Wiki不存在（<a href="'.mediawikiurlencode("https://meta.wikimedia.org/wiki/", "Special:CentralAuth/".$text[0]).'">檢查</a>）';
 						}
 					}
 				}
