@@ -201,12 +201,12 @@ if ($method == 'POST') {
 							$response .= "\n全域權限：".preg_replace("/\s{2,}/", " ", trim($m[1]));
 							$get = true;
 						}
-						if (preg_match('/Total(?: edits)?.*?<\/td>\s*<td.*?>(.*?)<\/td>/', $res, $m)) {
+						if (preg_match('/(?:<strong>Total edits.*?<\/td>|Total<\/td>)\s*<td.*?>(.*?)<\/td>/', $res, $m)) {
 							$response .= "\n總計：".trim(strip_tags($m[1]));
 							$get = true;
 						}
 						if (preg_match('/Live edits<\/td>\s*<td.*?>(.*?)<\/td>/', $res, $m)) {
-							$response .= "\n可見編輯：".trim(strip_tags($m[1]));
+							$response .= "\n可見編輯：".preg_replace("/\s{2,}/", " ", trim(strip_tags($m[1])));
 							$get = true;
 						}
 						if (preg_match("/<td>Deleted edits<\/td>\s*<td>(.*?)<\/td>/", $res, $m)) {
