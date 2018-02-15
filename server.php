@@ -189,7 +189,8 @@ if ($method == 'POST') {
 					} else {
 						$res = str_replace("\n", "", $res);
 						$res = html_entity_decode($res);
-						$response = $text[0]."@".$text[1];
+						$response = '<a href="'.mediawikiurlencode("https://meta.wikimedia.org/wiki/", "Special:CentralAuth/".$text[0]).'">'.$text[0].'</a>'.
+							"@".$text[1];
 						$get = false;
 						file_put_contents(__DIR__."/data/".$text[0].".html", $res);
 						if (preg_match("/User groups.*?<\/td>\s*<td>\s*(.*?)\s*<\/td>/", $res, $m)) {
@@ -227,7 +228,7 @@ if ($method == 'POST') {
 				}
 			}
 			if ($response !== "") {
-				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&disable_web_page_preview=1&text='.urlencode($response).'"';
+				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&disable_web_page_preview=1&parse_mode=HTML&text='.urlencode($response).'"';
 				system($commend);
 			}
 		} else if ($data["mode"] == "stop") {
