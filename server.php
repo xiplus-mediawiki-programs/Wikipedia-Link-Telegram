@@ -353,7 +353,7 @@ if ($method == 'POST') {
 				if ($data["404"]) {
 					$res = @file_get_contents($url);
 					if ($res === false) {
-						$text .= " （404，<a href='".$articlepath."Special:Search?search=".urlencode($page)."'>搜尋</a>）";
+						$text .= " （404，<a href='".$articlepath."Special:Search?search=".urlencode($page)."&fulltext=1'>搜尋</a>）";
 					}
 				}
 				$response[]= $text;
