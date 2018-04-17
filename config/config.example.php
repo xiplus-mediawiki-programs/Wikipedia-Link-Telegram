@@ -12,6 +12,7 @@ $cfg['defaultdata'] = [
 	"articlepath" => "https://zh.wikipedia.org/wiki/",
 	"lastuse" => time()
 ];
+$cfg['404limit'] = 5;
 $cfg['stoplimit'] = 86400 * 7;
 $cfg['unusedlimit'] = 86400 * 7;
 $cfg['noautoleavelist'] = [

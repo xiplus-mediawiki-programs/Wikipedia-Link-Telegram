@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__.'/config/config.php');
+require_once(__DIR__.'/function/curl.php');
 require_once($cfg['module']['mediawikiurlencode']);
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -249,7 +250,8 @@ if ($method == 'POST') {
 
 		} else if (preg_match_all("/(\[\[([^\[\]])+?]]|{{([^{}]+?)}})/", $text, $m)) {
 			$data["lastuse"] = time();
-			$response = [];
+			$urls = [];
+			$urlsinfo = [];
 			foreach ($m[1] as $temp) {
 				$articlepath = $data["articlepath"];
 				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*?]]$/", $temp, $m2)) {
@@ -278,6 +280,9 @@ if ($method == 'POST') {
 						$page = $m3[1];
 					} else if (preg_match("/^:?mc:(.*)$/i", $page, $m3)) {
 						$articlepath = "https://minecraft-zh.gamepedia.com/";
+						$page = $m3[1];
+					} else if (preg_match("/^:?nico:(.*)$/i", $page, $m3)) {
+						$articlepath = "http://dic.nicovideo.jp/t/a/";
 						$page = $m3[1];
 					}
 					$page = preg_replace("/^Special:AF/i", "Special:AbuseFilter", $page);
@@ -349,23 +354,52 @@ if ($method == 'POST') {
 					continue;
 				}
 				$url = mediawikiurlencode($articlepath, $prefix.$page, $section);
-				$text = $url;
-				if ($data["404"]) {
-					$res = @file_get_contents($url);
-					if ($res === false) {
-						$text .= " （404，<a href='".$articlepath."Special:Search?search=".urlencode($page)."&fulltext=1'>搜尋</a>）";
-					}
-				}
-				$response[]= $text;
+				$urls[]= $url;
+				$urlsinfo[$url] = ['page' => $page, 'articlepath' => $articlepath];
 			}
-			$responsetext = implode("\n", $response);
-			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "'.
-				'chat_id='.$chat_id.'&'.
-				'reply_to_message_id='.$input['message']['message_id'].'&'.
-				(count($response)>1||!$data["pagepreview"] ? 'disable_web_page_preview=1&' : '').
-				'parse_mode=HTML&'.
-				'text='.urlencode($responsetext).'"';
-			system($commend);
+			$responsetext = implode("\n", $urls);
+			if ($data["404"]) {
+				$responsetext .= "\n正在檢查404...";
+			}
+			$post = [
+				'chat_id' => $chat_id,
+				'reply_to_message_id' => $input['message']['message_id'],
+				'parse_mode' => 'HTML',
+				'text' => $responsetext,
+			];
+			if (count($urls) > 1 || !$data["pagepreview"]) {
+				$post['disable_web_page_preview'] = '1';
+			}
+			$res = cURL('https://api.telegram.org/bot'.$cfg['token'].'/sendMessage', $post);
+			$res = json_decode($res, true);
+			if ($res["ok"] && $data["404"]) {
+				$message_id = $res["result"]["message_id"];
+				$response = [];
+				foreach ($urls as $cnt => $url) {
+					$text = $url;
+					if ($cnt < $cfg['404limit']) {
+						$res = @file_get_contents($url);
+						if ($res === false) {
+							$text .= " （404，<a href='".$urlsinfo[$url]['articlepath']."Special:Search?search=".urlencode($urlsinfo[$url]['page'])."&fulltext=1'>搜尋</a>）";
+						}
+					}
+					$response []= $text;
+				}
+				$responsetext = implode("\n", $response);
+				if (count($urls) > $cfg['404limit']) {
+					$responsetext .= "\n只檢查前".$cfg['404limit']."個頁面是否存在";
+				}
+				$post = [
+					'chat_id' => $chat_id,
+					'message_id' => $message_id,
+					'parse_mode' => 'HTML',
+					'text' => $responsetext,
+				];
+				if (count($urls) > 1 || !$data["pagepreview"]) {
+					$post['disable_web_page_preview'] = '1';
+				}
+				$res = cURL('https://api.telegram.org/bot'.$cfg['token'].'/editMessageText', $post);
+			}
 		} else {
 			if (time() - $data["lastuse"] > $cfg['unusedlimit'] && !in_array($chat_id, $cfg['noautoleavelist'])) {
 				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("機器人發現已經".$cfg['unusedlimit']."秒沒有被使用了，因此將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
