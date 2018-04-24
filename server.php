@@ -229,6 +229,36 @@ if ($method == 'POST') {
 						}
 					}
 				}
+			} else if (($chat_id > 0 && $cmd === "/whatis") || $cmd === "/whatis@WikipediaLinkBot") {
+				$articlepath = $data["articlepath"];
+				$text = trim($text);
+				if ($text === "") {
+					$response = "請提供要搜尋的詞";
+				} else {
+					$nslist = ["Special", "", "User", "Project", "File", "Mediawiki", "Template", "Help", "Category", "Portal", "Draft", "Module"];
+					$titles = [];
+					foreach ($nslist as $ns) {
+						$titles []= ($ns.":".$text);
+					}
+					$api = "https://zh.wikipedia.org/w/api.php?action=query&format=json&prop=info&titles=".urlencode(implode("|", $titles));
+					$res = file_get_contents($api);
+					if ($res === false) {
+						$response = "抓取發生錯誤，請稍後再試";
+					} else {
+						$response = [];
+						$res = json_decode($res, true);
+						foreach ($res["query"]["pages"] as $page) {
+							if (!isset($page["missing"])) {
+								$response []= mediawikiurlencode("https://zh.wikipedia.org/wiki/", $page["title"]);
+							}
+						}
+						if (count($response) > 0) {
+							$response = implode("\n", $response);
+						} else {
+							$response = "沒有名為「".$text."」的頁面";
+						}
+					}
+				}
 			}
 			if ($response !== "") {
 				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&disable_web_page_preview=1&parse_mode=HTML&text='.urlencode($response).'"';
