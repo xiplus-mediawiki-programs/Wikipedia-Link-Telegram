@@ -1,5 +1,8 @@
 <?php
+set_time_limit(60);
+$starttime = microtime(true);
 require_once(__DIR__.'/config/config.php');
+require_once(__DIR__.'/log.php');
 require_once(__DIR__.'/function/curl.php');
 require_once($cfg['module']['mediawikiurlencode']);
 
@@ -8,9 +11,6 @@ if ($method == 'POST') {
 	$inputJSON = file_get_contents('php://input');
 	$input = json_decode($inputJSON, true);
 	$chat_id = $input['message']['chat']['id'];
-	if ($cfg['log']) {
-		file_put_contents(__DIR__."/data/".$chat_id.".log", $inputJSON);
-	}
 	$datafile = __DIR__."/data/".$chat_id."_setting.json";
 	$data = @file_get_contents($datafile);
 	if ($data === false) {
@@ -20,6 +20,11 @@ if ($method == 'POST') {
 	}
 	$data += $cfg['defaultdata'];
 	if (isset($input['message']['text']) || isset($input['message']['caption'])) {
+		$sourcetext = $input["message"]["from"]["first_name"]."(".$input["message"]["from"]["id"].")";
+		if (isset($input["message"]["chat"]["title"])) {
+			$sourcetext .= " @ ".$input["message"]["chat"]["title"]."(".$input["message"]["chat"]["id"].")";
+		}
+
 		if (isset($input['message']['text'])) {
 			$text = $input['message']['text'];
 		} else if (isset($input['message']['caption'])) {
@@ -32,34 +37,40 @@ if ($method == 'POST') {
 			$res = file_get_contents('https://api.telegram.org/bot'.$cfg['token'].'/getChatMember?chat_id='.$chat_id.'&user_id='.$user_id);
 			$res = json_decode($res, true);
 			$isadmin = in_array($res["result"]["status"], ["creator", "administrator"]);
-			$text = str_replace("\n", " ", $text);
-			$text = preg_replace("/^([^ ]+) +/", "$1 ", $text);
-			$temp = explode(" ", $text);
-			$cmd = $temp[0];
-			unset($temp[0]);
-			$text = implode(" ", $temp);
+			$arg = str_replace("\n", " ", $text);
+			$arg = preg_replace("/^([^ ]+) +/", "$1 ", $arg);
+			$arg = explode(" ", $arg);
+			$cmd = $arg[0];
+			unset($arg[0]);
+			$arg = implode(" ", $arg);
 			$response = "";
 			if ($chat_id < 0 && $cmd === "/cmdadminonly@WikipediaLinkBot") {
 				if (!$isadmin) {
 					$response = "只有群組管理員可以變更此設定";
+					WriteLog($sourcetext."\n".$text, "cmdadminonly_denied");
 				} else {
 					$data["cmdadminonly"] = !$data["cmdadminonly"];
 					if ($data["cmdadminonly"]) {
 						$response = "現在起只有群組管理員可以變更回覆設定";
+						WriteLog($sourcetext."\n".$text, "cmdadminonly_on");
 					} else {
 						$response = "現在起所有人都可以變更回覆設定";
+						WriteLog($sourcetext."\n".$text, "cmdadminonly_pff");
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/start") || $cmd === "/start@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+					WriteLog($sourcetext."\n".$text, "start_denied");
 				} else {
 					$data["mode"] = "start";
 					$response = "已啟用連結回覆";
+					WriteLog($sourcetext."\n".$text, "start");
 				}
 			} else if (($chat_id > 0 && $cmd === "/stop") || $cmd === "/stop@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+					WriteLog($sourcetext."\n".$text, "stop_denied");
 				} else if ($chat_id < 0) {
 					if ($data["mode"] !== "stop") {
 						$data["stoptime"] = time();
@@ -69,49 +80,59 @@ if ($method == 'POST') {
 					if (!in_array($chat_id, $cfg['noautoleavelist'])) {
 						$response .= "\n機器人將會在".($cfg['stoplimit']-(time()-$data["stoptime"]))."秒後自動退出";
 					}
+					WriteLog($sourcetext."\n".$text, "stop");
 				} else {
 					$data["mode"] = "stop";
 					$response = "已停用連結回覆";
+					WriteLog($sourcetext."\n".$text, "stop");
 				}
 			} else if (($chat_id > 0 && $cmd === "/optin") || $cmd === "/optin@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+					WriteLog($sourcetext."\n".$text, "optin_denied");
 				} else {
-					if ($text === "") {
+					if ($arg === "") {
 						$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式才會回覆連結\n".
 						"範例：/optin /pattern/";
+						WriteLog($sourcetext."\n".$text, "optin_no_arg");
 					} else {
-						if ($text[0] === "/" && substr($text, -1) === "/") {
-							$text = substr($text, 1, -1);
+						if ($arg[0] === "/" && substr($arg, -1) === "/") {
+							$arg = substr($arg, 1, -1);
 						}
-						$text = "/".$text."/";
-						if (preg_match($text, null) === false) {
+						$arg = "/".$arg."/";
+						if (preg_match($arg, null) === false) {
 							$response = "設定 /optin 的正規表達式包含錯誤，設定沒有改變";
+							WriteLog($sourcetext."\n".$text, "optin_wrong_arg");
 						} else {
 							$data["mode"] = "optin";
-							$data["regex"] = $text;
-							$response = "已啟用部分連結回覆：".$text;
+							$data["regex"] = $arg;
+							$response = "已啟用部分連結回覆：".$arg;
+							WriteLog($sourcetext."\n".$text, "optin");
 						}
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/optout") || $cmd === "/optout@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+					WriteLog($sourcetext."\n".$text, "optout_denied");
 				} else {
-					if ($text === "") {
+					if ($arg === "") {
 						$response = "此指令需包含一個參數為正規表達式(php)，當訊息符合這個正規表達式不會回覆連結\n".
 							"範例：/optout /pattern/";
+						WriteLog($sourcetext."\n".$text, "optout_no_arg");
 					} else {
-						if ($text[0] === "/" && substr($text, -1) === "/") {
-							$text = substr($text, 1, -1);
+						if ($arg[0] === "/" && substr($arg, -1) === "/") {
+							$arg = substr($arg, 1, -1);
 						}
-						$text = "/".$text."/";
-						if (preg_match($text, null) === false) {
+						$arg = "/".$arg."/";
+						if (preg_match($arg, null) === false) {
 							$response = "設定 /optout 的正規表達式包含錯誤，設定沒有改變";
+							WriteLog($sourcetext."\n".$text, "optout_wrong_arg");
 						} else {
 							$data["mode"] = "optout";
-							$data["regex"] = $text;
-							$response = "已停用部分連結回覆：".$text;
+							$data["regex"] = $arg;
+							$response = "已停用部分連結回覆：".$arg;
+							WriteLog($sourcetext."\n".$text, "optout");
 						}
 					}
 				}
@@ -128,42 +149,52 @@ if ($method == 'POST') {
 					$response .= "\n".($data["cmdadminonly"]?"只有管理員可以變更回覆設定":"所有人都可以變更回覆設定");
 				}
 				$response .= "\n使用 /help 查看更改設定的指令";
+				WriteLog($sourcetext."\n".$text, "settings");
 			} else if (($chat_id > 0 && $cmd === "/404") || $cmd === "/404@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+					WriteLog($sourcetext."\n".$text, "404_denied");
 				} else {
 					$data["404"] = !$data["404"];
 					if ($data["404"]) {
 						$response = "已開啟頁面存在檢測（提醒：回應會稍慢）";
+						WriteLog($sourcetext."\n".$text, "404_on");
 					} else {
 						$response = "已關閉頁面存在檢測";
+						WriteLog($sourcetext."\n".$text, "404_off");
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/pagepreview") || $cmd === "/pagepreview@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+					WriteLog($sourcetext."\n".$text, "pagepreview_denied");
 				} else {
 					$data["pagepreview"] = !$data["pagepreview"];
 					if ($data["pagepreview"]) {
 						$response = "已開啟連結預覽（提醒：僅有一個連結時會預覽）";
+						WriteLog($sourcetext."\n".$text, "pagepreview_on");
 					} else {
 						$response = "已關閉連結預覽";
+						WriteLog($sourcetext."\n".$text, "pagepreview_off");
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/articlepath") || $cmd === "/articlepath@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更文章路徑\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
+					WriteLog($sourcetext."\n".$text, "articlepath_denied");
 				} else {
-					if ($text === "") {
+					if ($arg === "") {
 						$response = "此指令需包含一個參數為文章路徑\n".
 						"範例：/articlepath https://zh.wikipedia.org/wiki/";
+						WriteLog($sourcetext."\n".$text, "articlepath_no_arg");
 					} else {
-						$data["articlepath"] = $text;
-						$response = "文章路徑已設定為 ".$text;
-						$res = file_get_contents($text);
+						$data["articlepath"] = $arg;
+						$response = "文章路徑已設定為 ".$arg;
+						$res = file_get_contents($arg);
 						if ($res === false) {
 							$response .= "\n提醒：檢測到網頁可能不存在";
 						}
+						WriteLog($sourcetext."\n".$text, "articlepath");
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/help") || $cmd === "/help@WikipediaLinkBot") {
@@ -178,24 +209,27 @@ if ($method == 'POST') {
 				if ($chat_id < 0) {
 					$response .= "/cmdadminonly 調整是否只有管理員才可變更設定\n";
 				}
+				WriteLog($sourcetext."\n".$text, "help");
 			} else if (($chat_id > 0 && $cmd === "/editcount") || $cmd === "/editcount@WikipediaLinkBot") {
-				$text = trim($text);
-				$text = explode("@", $text);
-				if (count($text) !== 2 || trim($text[0]) === "" || trim($text[1]) === "") {
+				WriteLog($sourcetext."\n".$text, "editcount");
+
+				$arg = trim($arg);
+				$arg = explode("@", $arg);
+				if (count($arg) !== 2 || trim($arg[0]) === "" || trim($arg[1]) === "") {
 					$response = "格式錯誤，必須為 Username@Wiki";
 				} else {
-					$text[0] = ucfirst($text[0]);
-					$url = "https://xtools.wmflabs.org/ec/".$text[1]."/".urlencode($text[0])."?uselang=en";
+					$arg[0] = ucfirst($arg[0]);
+					$url = "https://xtools.wmflabs.org/ec/".$arg[1]."/".urlencode($arg[0])."?uselang=en";
 					$res = file_get_contents($url);
 					if ($res === false) {
 						$response = "連線發生錯誤";
 					} else {
 						$res = str_replace("\n", "", $res);
 						$res = html_entity_decode($res);
-						$response = '<a href="'.mediawikiurlencode("https://meta.wikimedia.org/wiki/", "Special:CentralAuth/".$text[0]).'">'.$text[0].'</a>'.
-							"@".$text[1].'（<a href="'.$url.'">檢查</a>）';
+						$response = '<a href="'.mediawikiurlencode("https://meta.wikimedia.org/wiki/", "Special:CentralAuth/".$arg[0]).'">'.$arg[0].'</a>'.
+							"@".$arg[1].'（<a href="'.$url.'">檢查</a>）';
 						$get = false;
-						file_put_contents(__DIR__."/data/".$text[0].".html", $res);
+						file_put_contents(__DIR__."/data/".$arg[0].".html", $res);
 						if (preg_match("/User groups.*?<\/td>\s*<td>\s*(.*?)\s*<\/td>/", $res, $m)) {
 							$response .= "\n權限：".preg_replace("/\s{2,}/", " ", trim($m[1]));
 							$get = true;
@@ -225,20 +259,20 @@ if ($method == 'POST') {
 							$get = true;
 						}
 						if (!$get) {
-							$response = '用戶名或Wiki不存在（<a href="'.mediawikiurlencode("https://meta.wikimedia.org/wiki/", "Special:CentralAuth/".$text[0]).'">檢查</a>）';
+							$response = '用戶名或Wiki不存在（<a href="'.mediawikiurlencode("https://meta.wikimedia.org/wiki/", "Special:CentralAuth/".$arg[0]).'">檢查</a>）';
 						}
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/whatis") || $cmd === "/whatis@WikipediaLinkBot") {
 				$articlepath = $data["articlepath"];
-				$text = trim($text);
-				if ($text === "") {
+				$arg = trim($arg);
+				if ($arg === "") {
 					$response = "請提供要搜尋的詞";
 				} else {
 					$nslist = ["Special", "", "User", "Project", "File", "Mediawiki", "Template", "Help", "Category", "Portal", "Draft", "Module"];
 					$titles = [];
 					foreach ($nslist as $ns) {
-						$titles []= ($ns.":".$text);
+						$titles []= ($ns.":".$arg);
 					}
 					$api = "https://zh.wikipedia.org/w/api.php?action=query&format=json&prop=info&titles=".urlencode(implode("|", $titles));
 					$res = file_get_contents($api);
@@ -255,14 +289,18 @@ if ($method == 'POST') {
 						if (count($response) > 0) {
 							$response = implode("\n", $response);
 						} else {
-							$response = "沒有名為「".$text."」的頁面";
+							$response = "沒有名為「".$arg."」的頁面";
 						}
 					}
 				}
+				WriteLog($sourcetext."\n".$text, "whatis");
 			}
 			if ($response !== "") {
 				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&disable_web_page_preview=1&parse_mode=HTML&text='.urlencode($response).'"';
 				system($commend);
+
+				$spendtime = (microtime(true)-$starttime);
+				WriteLog($sourcetext."\n".$response."\n".$spendtime, "response");
 			}
 		} else if ($data["mode"] == "stop") {
 			if (!isset($data["stoptime"])) {
@@ -273,12 +311,16 @@ if ($method == 'POST') {
 				system($commend);
 				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
 				system($commend);
+
+				WriteLog($sourcetext."\n".$text, "quit");
 			}
 		} else if ($data["mode"] == "optin" && !preg_match($data["regex"], $text)) {
 			
 		} else if ($data["mode"] == "optout" && preg_match($data["regex"], $text)) {
 
 		} else if (preg_match_all("/(\[\[([^\[\]])+?]]|{{([^{}]+?)}})/", $text, $m)) {
+			WriteLog($sourcetext."\n".$text, "request");
+
 			$data["lastuse"] = time();
 			$urls = [];
 			$urlsinfo = [];
@@ -401,6 +443,10 @@ if ($method == 'POST') {
 				$post['disable_web_page_preview'] = '1';
 			}
 			$res = cURL('https://api.telegram.org/bot'.$cfg['token'].'/sendMessage', $post);
+
+			$spendtime = (microtime(true)-$starttime);
+			WriteLog($sourcetext."\n".$responsetext."\n".$spendtime."s", "response");
+
 			$res = json_decode($res, true);
 			if ($res["ok"] && $data["404"]) {
 				$message_id = $res["result"]["message_id"];
@@ -429,6 +475,9 @@ if ($method == 'POST') {
 					$post['disable_web_page_preview'] = '1';
 				}
 				$res = cURL('https://api.telegram.org/bot'.$cfg['token'].'/editMessageText', $post);
+
+				$spendtime = (microtime(true)-$starttime);
+				WriteLog($sourcetext."\n".$responsetext."\n".$spendtime."s", "response_update");
 			}
 		} else {
 			if (time() - $data["lastuse"] > $cfg['unusedlimit'] && !in_array($chat_id, $cfg['noautoleavelist'])) {
@@ -436,6 +485,8 @@ if ($method == 'POST') {
 				system($commend);
 				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
 				system($commend);
+
+				WriteLog($sourcetext."\n".$text, "quit");
 			}
 		}
 		file_put_contents($datafile, json_encode($data));
@@ -446,6 +497,9 @@ if ($method == 'POST') {
 			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("感謝您使用本機器人，當您輸入[[頁面名]]或{{模板名}}時，機器人將會自動回覆連結").'"';
 			system($commend);
 			file_put_contents($datafile, json_encode($data));
+
+			WriteLog($sourcetext, "add");
 		}
 	}
 }
+#  > /dev/null 2>&1
