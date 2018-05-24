@@ -1,10 +1,10 @@
 <?php
 set_time_limit(60);
 $starttime = microtime(true);
-require_once(__DIR__.'/config/config.php');
+require_once(__DIR__.'/config/config.default.php');
 require_once(__DIR__.'/log.php');
 require_once(__DIR__.'/function/curl.php');
-require_once($cfg['module']['mediawikiurlencode']);
+require_once($C['module']['mediawikiurlencode']);
 
 $method = $_SERVER['REQUEST_METHOD'];
 if ($method == 'POST') {
@@ -14,11 +14,11 @@ if ($method == 'POST') {
 	$datafile = __DIR__."/data/".$chat_id."_setting.json";
 	$data = @file_get_contents($datafile);
 	if ($data === false) {
-		$data = $cfg['defaultdata'];
+		$data = $C['defaultdata'];
 	} else if (($data = json_decode($data, true)) === null) {
-		$data = $cfg['defaultdata'];
+		$data = $C['defaultdata'];
 	}
-	$data += $cfg['defaultdata'];
+	$data += $C['defaultdata'];
 	if (isset($input['message']['text']) || isset($input['message']['caption'])) {
 		$sourcetext = $input["message"]["from"]["first_name"]."(".$input["message"]["from"]["id"].")";
 		if (isset($input["message"]["chat"]["title"])) {
@@ -34,7 +34,7 @@ if ($method == 'POST') {
 		}
 		if (strpos($text, "/") === 0) {
 			$user_id = $input['message']['from']['id'];
-			$res = file_get_contents('https://api.telegram.org/bot'.$cfg['token'].'/getChatMember?chat_id='.$chat_id.'&user_id='.$user_id);
+			$res = file_get_contents('https://api.telegram.org/bot'.$C['token'].'/getChatMember?chat_id='.$chat_id.'&user_id='.$user_id);
 			$res = json_decode($res, true);
 			$isadmin = in_array($res["result"]["status"], ["creator", "administrator"]);
 			$arg = str_replace("\n", " ", $text);
@@ -77,8 +77,8 @@ if ($method == 'POST') {
 					}
 					$data["mode"] = "stop";
 					$response = "已停用連結回覆";
-					if (!in_array($chat_id, $cfg['noautoleavelist'])) {
-						$response .= "\n機器人將會在".($cfg['stoplimit']-(time()-$data["stoptime"]))."秒後自動退出";
+					if (!in_array($chat_id, $C['noautoleavelist'])) {
+						$response .= "\n機器人將會在".($C['stoplimit']-(time()-$data["stoptime"]))."秒後自動退出";
 					}
 					WriteLog($sourcetext."\n".$text, "stop");
 				} else {
@@ -137,7 +137,7 @@ if ($method == 'POST') {
 					}
 				}
 			} else if (($chat_id > 0 && $cmd === "/settings") || $cmd === "/settings@WikipediaLinkBot") {
-				$response = "chat id為".$chat_id.(in_array($chat_id, $cfg['noautoleavelist'])?"（不退出白名單）":"");
+				$response = "chat id為".$chat_id.(in_array($chat_id, $C['noautoleavelist'])?"（不退出白名單）":"");
 				$response .= "\n連結回覆設定為".$data["mode"];
 				if (in_array($data["mode"], ["optin", "optout"])) {
 					$response .= "\n正規表達式：".$data["regex"]."";
@@ -296,7 +296,7 @@ if ($method == 'POST') {
 				WriteLog($sourcetext."\n".$text, "whatis");
 			}
 			if ($response !== "") {
-				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&disable_web_page_preview=1&parse_mode=HTML&text='.urlencode($response).'"';
+				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/sendMessage -d "chat_id='.$chat_id.'&reply_to_message_id='.$input['message']['message_id'].'&disable_web_page_preview=1&parse_mode=HTML&text='.urlencode($response).'"';
 				system($commend);
 
 				$spendtime = (microtime(true)-$starttime);
@@ -306,10 +306,10 @@ if ($method == 'POST') {
 			if (!isset($data["stoptime"])) {
 				$data["stoptime"] = time();
 			}
-			if (time() - $data["stoptime"] > $cfg['stoplimit'] && !in_array($chat_id, $cfg['noautoleavelist'])) {
-				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("因為停用回覆過久，機器人將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
+			if (time() - $data["stoptime"] > $C['stoplimit'] && !in_array($chat_id, $C['noautoleavelist'])) {
+				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("因為停用回覆過久，機器人將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
 				system($commend);
-				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
+				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
 				system($commend);
 
 				WriteLog($sourcetext."\n".$text, "quit");
@@ -442,7 +442,7 @@ if ($method == 'POST') {
 			if (count($urls) > 1 || !$data["pagepreview"]) {
 				$post['disable_web_page_preview'] = '1';
 			}
-			$res = cURL('https://api.telegram.org/bot'.$cfg['token'].'/sendMessage', $post);
+			$res = cURL('https://api.telegram.org/bot'.$C['token'].'/sendMessage', $post);
 
 			$spendtime = (microtime(true)-$starttime);
 			WriteLog($sourcetext."\n".$responsetext."\n".$spendtime."s", "response");
@@ -453,7 +453,7 @@ if ($method == 'POST') {
 				$response = [];
 				foreach ($urls as $cnt => $url) {
 					$text = $url;
-					if ($cnt < $cfg['404limit']) {
+					if ($cnt < $C['404limit']) {
 						$res = @file_get_contents($url);
 						if ($res === false) {
 							$text .= " （404，<a href='".$urlsinfo[$url]['articlepath']."Special:Search?search=".urlencode($urlsinfo[$url]['page'])."&fulltext=1'>搜尋</a>）";
@@ -462,8 +462,8 @@ if ($method == 'POST') {
 					$response []= $text;
 				}
 				$responsetext = implode("\n", $response);
-				if (count($urls) > $cfg['404limit']) {
-					$responsetext .= "\n只檢查前".$cfg['404limit']."個頁面是否存在";
+				if (count($urls) > $C['404limit']) {
+					$responsetext .= "\n只檢查前".$C['404limit']."個頁面是否存在";
 				}
 				$post = [
 					'chat_id' => $chat_id,
@@ -474,16 +474,16 @@ if ($method == 'POST') {
 				if (count($urls) > 1 || !$data["pagepreview"]) {
 					$post['disable_web_page_preview'] = '1';
 				}
-				$res = cURL('https://api.telegram.org/bot'.$cfg['token'].'/editMessageText', $post);
+				$res = cURL('https://api.telegram.org/bot'.$C['token'].'/editMessageText', $post);
 
 				$spendtime = (microtime(true)-$starttime);
 				WriteLog($sourcetext."\n".$responsetext."\n".$spendtime."s", "response_update");
 			}
 		} else {
-			if (time() - $data["lastuse"] > $cfg['unusedlimit'] && !in_array($chat_id, $cfg['noautoleavelist'])) {
-				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("機器人發現已經".$cfg['unusedlimit']."秒沒有被使用了，因此將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
+			if (time() - $data["lastuse"] > $C['unusedlimit'] && !in_array($chat_id, $C['noautoleavelist'])) {
+				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("機器人發現已經".$C['unusedlimit']."秒沒有被使用了，因此將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
 				system($commend);
-				$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
+				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
 				system($commend);
 
 				WriteLog($sourcetext."\n".$text, "quit");
@@ -491,10 +491,10 @@ if ($method == 'POST') {
 		}
 		file_put_contents($datafile, json_encode($data));
 	} else if (isset($input['message']['new_chat_member'])) {
-		if ($input['message']['new_chat_member']['username'] == $cfg['bot_username']) {
+		if ($input['message']['new_chat_member']['username'] == $C['bot_username']) {
 			$data["lastuse"] = time();
 			$data["stoptime"] = time();
-			$commend = 'curl https://api.telegram.org/bot'.$cfg['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("感謝您使用本機器人，當您輸入[[頁面名]]或{{模板名}}時，機器人將會自動回覆連結").'"';
+			$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("感謝您使用本機器人，當您輸入[[頁面名]]或{{模板名}}時，機器人將會自動回覆連結").'"';
 			system($commend);
 			file_put_contents($datafile, json_encode($data));
 
