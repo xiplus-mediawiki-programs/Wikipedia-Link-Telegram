@@ -329,43 +329,17 @@ if ($method == 'POST') {
 				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*?]]$/", $temp, $m2)) {
 					$prefix = "";
 					$page = trim($m2[1]);
-					if (preg_match("/^:?moe:(.*)$/i", $page, $m3)) {
-						$articlepath = "https://zh.moegirl.org/";
-						$page = $m3[1];
-					} else if (preg_match("/^:?kom?:(.*)$/i", $page, $m3)) {
-						$articlepath = "https://wiki.komica.org/";
-						$page = $m3[1];
-					} else if (preg_match("/^:?unct?:(.*)$/i", $page, $m3)) {
-						$articlepath = "http://uncyclopedia.tw/wiki/";
-						$page = $m3[1];
-					} else if (preg_match("/^:?uncc:(.*)$/i", $page, $m3)) {
-						$articlepath = "http://cn.uncyclopedia.wikia.com/wiki/";
-						$page = $m3[1];
-					} else if (preg_match("/^:?abf:(.*)$/i", $page, $m3)) {
-						$articlepath = "https://zh.wikipedia.org/wiki/Special:AbuseFilter/";
-						$page = $m3[1];
-					} else if (preg_match("/^:?(?:cpb|ctext):(.*)$/i", $page, $m3)) {
-						$articlepath = "http://ctext.org/dictionary.pl?if=gb&char=";
-						$page = $m3[1];
-					} else if (preg_match("/^:?(?:cpba|ctexta):(.*)$/i", $page, $m3)) {
-						$articlepath = "http://ctext.org/searchbooks.pl?if=gb&author=";
-						$page = $m3[1];
-					} else if (preg_match("/^:?mc:(.*)$/i", $page, $m3)) {
-						$articlepath = "https://minecraft-zh.gamepedia.com/";
-						$page = $m3[1];
-					} else if (preg_match("/^:?nico:(.*)$/i", $page, $m3)) {
-						$articlepath = "http://dic.nicovideo.jp/t/a/";
-						$page = $m3[1];
-					}
-					$page = preg_replace("/^Special:AF/i", "Special:AbuseFilter", $page);
-					$page = preg_replace("/:$/i", "%3A", $page);
-					$page = preg_replace("/!$/i", "%21", $page);
-					$page = preg_replace("/\?$/i", "%3F", $page);
 					if (isset($m2[2])) {
 						$section = $m2[2];
 					} else {
 						$section = "";
 					}
+
+					$C['specialrule']($chat_id, $articlepath, $page);
+
+					$page = preg_replace("/:$/i", "%3A", $page);
+					$page = preg_replace("/!$/i", "%21", $page);
+					$page = preg_replace("/\?$/i", "%3F", $page);
 				} else if (preg_match("/^{{ *#(exer|if|ifeq|ifexist|ifexpr|switch|time|language|babel|invoke) *:/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:解析器函数";

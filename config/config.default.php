@@ -15,6 +15,7 @@ $C['404limit'] = 5;
 $C['stoplimit'] = 86400 * 7;
 $C['unusedlimit'] = 86400 * 7;
 $C['noautoleavelist'] = [];
+$C['specialrule'] = function($chat_id, &$articlepath, &$page) {};
 
 $C['module']['mediawikiurlencode'] = __DIR__.'/function/Mediawiki-urlencode/mediawikiurlencode.php';
 
