@@ -307,12 +307,13 @@ if ($method == 'POST') {
 				$data["stoptime"] = time();
 			}
 			if (time() - $data["stoptime"] > $C['stoplimit'] && !in_array($chat_id, $C['noautoleavelist'])) {
+				$data["leave"] = true;
 				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("因為停用回覆過久，機器人將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
 				system($commend);
 				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
 				system($commend);
 
-				WriteLog($sourcetext."\n".$text, "quit");
+				WriteLog($sourcetext."\n".$text, "leave");
 			}
 		} else if ($data["mode"] == "optin" && !preg_match($data["regex"], $text)) {
 			
@@ -455,12 +456,13 @@ if ($method == 'POST') {
 			}
 		} else {
 			if (time() - $data["lastuse"] > $C['unusedlimit'] && !in_array($chat_id, $C['noautoleavelist'])) {
+				$data["leave"] = true;
 				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("機器人發現已經".$C['unusedlimit']."秒沒有被使用了，因此將自動退出以節省伺服器資源，欲再使用請重新加入機器人").'"';
 				system($commend);
 				$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/leaveChat -d "chat_id='.$chat_id.'"';
 				system($commend);
 
-				WriteLog($sourcetext."\n".$text, "quit");
+				WriteLog($sourcetext."\n".$text, "leave");
 			}
 		}
 		file_put_contents($datafile, json_encode($data));
@@ -468,11 +470,13 @@ if ($method == 'POST') {
 		if ($input['message']['new_chat_member']['username'] == $C['bot_username']) {
 			$data["lastuse"] = time();
 			$data["stoptime"] = time();
+			$data["leave"] = false;
 			$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("感謝您使用本機器人，當您輸入[[頁面名]]或{{模板名}}時，機器人將會自動回覆連結").'"';
 			system($commend);
 			file_put_contents($datafile, json_encode($data));
 
 			WriteLog($sourcetext, "add");
+			file_put_contents($datafile, json_encode($data));
 		}
 	}
 }
