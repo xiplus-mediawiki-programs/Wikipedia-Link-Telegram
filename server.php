@@ -197,7 +197,7 @@ if ($method == 'POST') {
 						WriteLog($sourcetext."\n".$text, "articlepath");
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/help") || $cmd === "/help@WikipediaLinkBot") {
+			} else if (($chat_id > 0 && $cmd === "/help") || ($cmd === "/help@WikipediaLinkBot" && !in_array($chat_id, $C['notreplyhelplist']))) {
 				$response = "/settings 檢視連結回覆設定\n".
 					"/start 啟用所有連結回覆\n".
 					"/stop 停用所有連結回覆\n".
