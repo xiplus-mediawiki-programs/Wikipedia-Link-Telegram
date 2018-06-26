@@ -12,13 +12,29 @@ if ($method == 'POST') {
 	$input = json_decode($inputJSON, true);
 	$chat_id = $input['message']['chat']['id'];
 	$datafile = __DIR__."/data/".$chat_id."_setting.json";
-	$data = @file_get_contents($datafile);
-	if ($data === false) {
-		$data = $C['defaultdata'];
-	} else if (($data = json_decode($data, true)) === null) {
-		$data = $C['defaultdata'];
+	for ($i=$C['parseconfigretry']; $i >= 0; $i--) {
+		if ($i === 0) {
+			WriteLog($chat_id, "config_reset");
+			$data = $C['defaultdata'];
+			$commend = 'curl https://api.telegram.org/bot'.$C['token'].'/sendMessage -d "chat_id='.$chat_id.'&text='.urlencode("因為設定檔出錯，因此設定檔已被重置").'"';
+			system($commend);
+			break;
+		}
+		$datastr = @file_get_contents($datafile);
+		if ($datastr === false) {
+			$data = $C['defaultdata'];
+			WriteLog($chat_id, "config_not_exist");
+			break;
+		} else {
+			$data = json_decode($datastr, true);
+			if ($data === null) {
+				$data = $C['defaultdata'];
+				WriteLog($chat_id."\n".$datastr, "config_parse_fail");
+			} else {
+				break;
+			}
+		}
 	}
-	$data += $C['defaultdata'];
 	if (isset($input['message']['text']) || isset($input['message']['caption'])) {
 		$sourcetext = $input["message"]["from"]["first_name"]."(".$input["message"]["from"]["id"].")";
 		if (isset($input["message"]["chat"]["title"])) {
@@ -480,4 +496,3 @@ if ($method == 'POST') {
 		}
 	}
 }
-#  > /dev/null 2>&1

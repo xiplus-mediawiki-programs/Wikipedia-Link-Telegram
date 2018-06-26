@@ -14,6 +14,7 @@ $C['defaultdata'] = [
 $C['404limit'] = 5;
 $C['stoplimit'] = 86400 * 7;
 $C['unusedlimit'] = 86400 * 7;
+$C['parseconfigretry'] = 3;
 $C['noautoleavelist'] = [];
 $C['notreplyhelplist'] = [];
 $C['specialrule'] = function($chat_id, &$articlepath, &$page) {};
