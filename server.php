@@ -10,6 +10,9 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method == 'POST') {
 	$inputJSON = file_get_contents('php://input');
 	$input = json_decode($inputJSON, true);
+	if ($input['message']['date'] < time()-600) {
+		exit();
+	}
 	$chat_id = $input['message']['chat']['id'];
 	$datafile = __DIR__."/data/".$chat_id."_setting.json";
 	for ($i=$C['parseconfigretry']; $i >= 0; $i--) {
