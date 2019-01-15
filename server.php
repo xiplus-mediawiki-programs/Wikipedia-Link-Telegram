@@ -486,7 +486,8 @@ if ($method == 'POST') {
 		}
 		file_put_contents($datafile, json_encode($data));
 	} else if (isset($input['message']['new_chat_member'])) {
-		if ($input['message']['new_chat_member']['username'] == $C['bot_username']) {
+		if (isset($input['message']['new_chat_member']['username'])
+				&& $input['message']['new_chat_member']['username'] == $C['bot_username']) {
 			$data["lastuse"] = time();
 			$data["stoptime"] = time();
 			$data["leave"] = false;
