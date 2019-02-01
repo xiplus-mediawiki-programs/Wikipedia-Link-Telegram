@@ -10,6 +10,9 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method == 'POST') {
 	$inputJSON = file_get_contents('php://input');
 	$input = json_decode($inputJSON, true);
+	if (!isset($input['message'])) {
+		exit();
+	}
 	if ($input['message']['date'] < time()-600) {
 		exit();
 	}
