@@ -2,6 +2,7 @@
 
 $C['token'] = '';
 $C['webhook'] = 'https://example.com/WikipediaLinkBot/server.php';
+$C["max_connections"] = 40;
 $C['bot_username'] = 'WikipediaLinkBot';
 $C['defaultdata'] = [
 	'mode' => 'start',
