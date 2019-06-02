@@ -11,6 +11,8 @@ $C['parseconfigretry'] = 3;
 $C['notreplyhelplist'] = [];
 $C['specialrule'] = function($chat_id, &$articlepath, &$page) {};
 
+$C['logkeep'] = 86400 * 30;
+
 $C['module']['mediawikiurlencode'] = __DIR__.'/function/Mediawiki-urlencode/mediawikiurlencode.php';
 
 $C['DBhost'] = 'localhost';
