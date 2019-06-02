@@ -4,8 +4,9 @@ Telegram中文維基百科連結Bot
 ## 安裝
 1. 複製 ```config/config.example.php``` 至 ```config/config.php``` 並設定裡面的內容
 2. 建立 ```data/``` 並給予適當的寫入權限
-3. 執行 ```php install/setWebhook.php```（或者你可以自行將webhook網址設定好）
-4. 完成
+3. 使用 ```maintenance/database.sql``` 建立好資料庫
+4. 執行 ```php install/setWebhook.php```（或者你可以自行將webhook網址設定好）
+5. 完成
 
 ## 機器人指令
 * ```/settings``` 檢視連結回覆設定
