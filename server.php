@@ -222,6 +222,20 @@ if ($method == 'POST') {
 						WriteLog($sourcetext . "\n" . $text, "articlepath");
 					}
 				}
+			} else if ($chat_id < 0 && $cmd === "/noautoleave@WikipediaLinkBot") {
+				if (!in_array($user_id, $C['operator'])) {
+					$response = "只有機器人操作者可以變更此設定";
+					WriteLog($sourcetext . "\n" . $text, "noautoleave_denied");
+				} else {
+					$data["noautoleave"] = !$data["noautoleave"];
+					if ($data["noautoleave"]) {
+						$response = "已將此群加入到不退出白名單";
+						WriteLog($sourcetext . "\n" . $text, "noautoleave_on");
+					} else {
+						$response = "已將此群從不退出白名單移除";
+						WriteLog($sourcetext . "\n" . $text, "noautoleave_off");
+					}
+				}
 			} else if (($chat_id > 0 && $cmd === "/help") || ($cmd === "/help@WikipediaLinkBot" && !in_array($chat_id, $C['notreplyhelplist']))) {
 				$response = "/settings 檢視連結回覆設定\n" .
 					"/start 啟用所有連結回覆\n" .
@@ -515,7 +529,8 @@ if ($method == 'POST') {
 		`stoptime` = :stoptime,
 		`pagepreview` = :pagepreview,
 		`lastuse` = :lastuse,
-		`leave` = :leave
+		`leave` = :leave,
+		`noautoleave` = :noautoleave
 		WHERE `chatid` = :chatid");
 	$sth->bindValue(":chattitle", $data['chattitle']);
 	$sth->bindValue(":mode", $data['mode']);
@@ -527,6 +542,7 @@ if ($method == 'POST') {
 	$sth->bindValue(":stoptime", $data['stoptime']);
 	$sth->bindValue(":pagepreview", $data['pagepreview']);
 	$sth->bindValue(":leave", $data['leave']);
+	$sth->bindValue(":noautoleave", $data['noautoleave']);
 	$sth->bindValue(":chatid", $chat_id);
 	$sth->execute();
 }

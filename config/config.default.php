@@ -2,13 +2,14 @@
 
 $C['token'] = '';
 $C['webhook'] = 'https://example.com/WikipediaLinkBot/server.php';
-$C["max_connections"] = 40;
+$C['max_connections'] = 40;
 $C['bot_username'] = 'WikipediaLinkBot';
 $C['404limit'] = 5;
 $C['stoplimit'] = 86400 * 7;
 $C['unusedlimit'] = 86400 * 7;
 $C['parseconfigretry'] = 3;
 $C['notreplyhelplist'] = [];
+$C['operator'] = [];
 $C['specialrule'] = function($chat_id, &$articlepath, &$page) {};
 
 $C['logkeep'] = 86400 * 30;
