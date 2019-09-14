@@ -491,7 +491,7 @@ if ($method == 'POST') {
 				WriteLog($sourcetext . "\n" . $responsetext . "\n" . $spendtime . "s", "response_update");
 			}
 		} else {
-			if (time() - strtotime($data["lastuse"]) > $C['unusedlimit'] && !$data['noautoleave']) {
+			if ($chat_id < 0 && time() - strtotime($data["lastuse"]) > $C['unusedlimit'] && !$data['noautoleave']) {
 				$data["leave"] = true;
 				$commend = 'curl https://api.telegram.org/bot' . $C['token'] . '/sendMessage -d "chat_id=' . $chat_id . '&text=' . urlencode("機器人發現已經" . $C['unusedlimit'] . "秒沒有被使用了，因此將自動退出以節省伺服器資源，欲再使用請重新加入機器人") . '"';
 				system($commend);
