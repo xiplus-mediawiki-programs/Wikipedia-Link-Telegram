@@ -16,6 +16,7 @@
 	<tr>
 		<th>chatid</th>
 		<th>chattitle</th>
+		<th>username</th>
 		<th>mode</th>
 		<th>404</th>
 		<th>cmdadminonly</th>
@@ -36,6 +37,7 @@ foreach ($list as $data) {
 	echo "<tr>";
 	echo "<td>" . $data['chatid'] . "</td>";
 	echo "<td>" . htmlentities($data['chattitle']) . "</td>";
+	echo "<td>" . htmlentities($data['chatname']) . "</td>";
 	echo "<td>" . $data['mode'];
 	if (in_array($data['mode'], ["optin", "optout"])) {
 		echo " (" . htmlentities($data['regex']) . ")";

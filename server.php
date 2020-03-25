@@ -49,6 +49,11 @@ if ($method == 'POST') {
 				$data['chattitle'] .= ' ' . $input["message"]["from"]["last_name"];
 			}
 		}
+		if (isset($input["message"]["chat"]["username"])) {
+			$data['chatname'] = $input["message"]["chat"]["username"];
+		} else {
+			$data['chatname'] = 'N/A';
+		}
 
 		if (isset($input['message']['text'])) {
 			$text = $input['message']['text'];
@@ -520,6 +525,7 @@ if ($method == 'POST') {
 
 	$sth = $G["db"]->prepare("UPDATE `{$C['DBTBprefix']}setting` SET
 		`chattitle` = :chattitle,
+		`chatname` = :chatname,
 		`mode` = :mode,
 		`regex` = :regex,
 		`404` = :404,
@@ -533,6 +539,7 @@ if ($method == 'POST') {
 		`noautoleave` = :noautoleave
 		WHERE `chatid` = :chatid");
 	$sth->bindValue(":chattitle", $data['chattitle']);
+	$sth->bindValue(":chatname", $data['chatname']);
 	$sth->bindValue(":mode", $data['mode']);
 	$sth->bindValue(":regex", $data['regex']);
 	$sth->bindValue(":404", $data['404']);

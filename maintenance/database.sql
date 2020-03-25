@@ -19,6 +19,7 @@ CREATE TABLE `log` (
 CREATE TABLE `setting` (
   `chatid` bigint(20) NOT NULL,
   `chattitle` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `chatname` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `mode` enum('start','stop','optin','optout') COLLATE utf8_bin NOT NULL DEFAULT 'start',
   `regex` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `404` tinyint(1) NOT NULL DEFAULT '0',
@@ -27,7 +28,8 @@ CREATE TABLE `setting` (
   `lastuse` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `stoptime` timestamp NULL DEFAULT NULL,
   `pagepreview` tinyint(1) NOT NULL DEFAULT '1',
-  `leave` tinyint(1) NOT NULL DEFAULT '0'
+  `leave` tinyint(1) NOT NULL DEFAULT '0',
+  `noautoleave` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
