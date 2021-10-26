@@ -357,9 +357,9 @@ if ($method == 'POST') {
 				WriteLog($sourcetext . "\n" . $text, "leave");
 			}
 		} else if ($data["mode"] == "optin" && !preg_match($data["regex"], $text)) {
-
+			// pass
 		} else if ($data["mode"] == "optout" && preg_match($data["regex"], $text)) {
-
+			// pass
 		} else if (preg_match_all("/(\[\[([^\[\]])+?]]|{{([^{}]+?)}})/", $text, $m)) {
 			WriteLog($sourcetext . "\n" . $text, "request");
 
@@ -368,6 +368,7 @@ if ($method == 'POST') {
 			$urlsinfo = [];
 			foreach ($m[1] as $temp) {
 				$articlepath = $data["articlepath"];
+				$no404 = false;
 				if (preg_match("/^\[\[([^|#]+)(?:#([^|]+))?.*?]]$/", $temp, $m2)) {
 					$prefix = "";
 					$page = trim($m2[1]);
@@ -377,7 +378,7 @@ if ($method == 'POST') {
 						$section = "";
 					}
 
-					$C['specialrule']($chat_id, $articlepath, $page);
+					$C['specialrule']($chat_id, $articlepath, $page, $no404);
 
 					$page = preg_replace("/:$/i", "%3A", $page);
 					$page = preg_replace("/!$/i", "%21", $page);
@@ -443,7 +444,7 @@ if ($method == 'POST') {
 				}
 				$url = mediawikiurlencode($articlepath, $prefix . $page, $section);
 				$urls[] = $url;
-				$urlsinfo[$url] = ['page' => $page, 'articlepath' => $articlepath];
+				$urlsinfo[$url] = ['page' => $page, 'articlepath' => $articlepath, 'no404' => $no404];
 			}
 			$responsetext = implode("\n", $urls);
 			if ($data["404"]) {
@@ -467,9 +468,11 @@ if ($method == 'POST') {
 			if ($res["ok"] && $data["404"]) {
 				$message_id = $res["result"]["message_id"];
 				$response = [];
-				foreach ($urls as $cnt => $url) {
+				$cnt = 0;
+				foreach ($urls as $url) {
 					$text = $url;
-					if ($cnt < $C['404limit']) {
+					if ($cnt < $C['404limit'] && !$urlsinfo[$url]['no404']) {
+						$cnt++;
 						$res = @file_get_contents($url);
 						if ($res === false) {
 							$text .= " （404，<a href='" . $urlsinfo[$url]['articlepath'] . "Special:Search?search=" . urlencode($urlsinfo[$url]['page']) . "&fulltext=1'>搜尋</a>）";

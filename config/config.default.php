@@ -10,7 +10,7 @@ $C['unusedlimit'] = 86400 * 7;
 $C['parseconfigretry'] = 3;
 $C['notreplyhelplist'] = [];
 $C['operator'] = [];
-$C['specialrule'] = function($chat_id, &$articlepath, &$page) {};
+$C['specialrule'] = function($chat_id, &$articlepath, &$page, &$no404) {};
 
 $C['logkeep'] = 86400 * 30;
 
