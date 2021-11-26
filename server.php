@@ -473,7 +473,7 @@ if ($method == 'POST') {
 					$text = $url;
 					if ($cnt < $C['404limit'] && !$urlsinfo[$url]['no404']) {
 						$cnt++;
-						$res = @file_get_contents($url);
+						$res = cURL($url);
 						if ($res === false) {
 							$text .= " （404，<a href='" . $urlsinfo[$url]['articlepath'] . "Special:Search?search=" . urlencode($urlsinfo[$url]['page']) . "&fulltext=1'>搜尋</a>）";
 						}
