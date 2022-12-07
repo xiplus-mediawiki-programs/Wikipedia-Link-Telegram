@@ -459,12 +459,12 @@ if ($method == 'POST') {
 			if (count($urls) > 1 || !$data["pagepreview"]) {
 				$post['disable_web_page_preview'] = '1';
 			}
-			$res = cURL('https://api.telegram.org/bot' . $C['token'] . '/sendMessage', $post);
+			$rawres = cURL('https://api.telegram.org/bot' . $C['token'] . '/sendMessage', $post);
 
 			$spendtime = (microtime(true) - $starttime);
 			WriteLog($sourcetext . "\n" . $responsetext . "\n" . $spendtime . "s", "response");
 
-			$res = json_decode($res, true);
+			$res = json_decode($rawres, true);
 			if ($res["ok"] && $data["404"]) {
 				$message_id = $res["result"]["message_id"];
 				$response = [];
@@ -497,6 +497,9 @@ if ($method == 'POST') {
 
 				$spendtime = (microtime(true) - $starttime);
 				WriteLog($sourcetext . "\n" . $responsetext . "\n" . $spendtime . "s", "response_update");
+			}
+			if ($rawres === false || !$res['ok']) {
+				WriteLog($sourcetext . ' ' . $rawres, 'response_failed');
 			}
 		} else {
 			if ($chat_id < 0 && time() - strtotime($data["lastuse"]) > $C['unusedlimit'] && !$data['noautoleave']) {
