@@ -348,7 +348,7 @@ if ($method == 'POST') {
 			}
 		} else if ($data["mode"] == "stop") {
 			if (time() - strtotime($data["stoptime"]) > $C['stoplimit'] && !$data['noautoleave']) {
-				$data["leave"] = true;
+				$data["leave"] = 1;
 				$commend = 'curl https://api.telegram.org/bot' . $C['token'] . '/sendMessage -d "chat_id=' . $chat_id . '&text=' . urlencode("因為停用回覆過久，機器人將自動退出以節省伺服器資源，欲再使用請重新加入機器人") . '"';
 				system($commend);
 				$commend = 'curl https://api.telegram.org/bot' . $C['token'] . '/leaveChat -d "chat_id=' . $chat_id . '"';
@@ -505,7 +505,7 @@ if ($method == 'POST') {
 			}
 		} else {
 			if ($chat_id < 0 && time() - strtotime($data["lastuse"]) > $C['unusedlimit'] && !$data['noautoleave']) {
-				$data["leave"] = true;
+				$data["leave"] = 1;
 				$commend = 'curl https://api.telegram.org/bot' . $C['token'] . '/sendMessage -d "chat_id=' . $chat_id . '&text=' . urlencode("機器人發現已經" . $C['unusedlimit'] . "秒沒有被使用了，因此將自動退出以節省伺服器資源，欲再使用請重新加入機器人") . '"';
 				system($commend);
 				$commend = 'curl https://api.telegram.org/bot' . $C['token'] . '/leaveChat -d "chat_id=' . $chat_id . '"';
@@ -519,7 +519,7 @@ if ($method == 'POST') {
 			&& $input['message']['new_chat_member']['username'] == $C['bot_username']) {
 			$data["lastuse"] = $nowtimestr;
 			$data["stoptime"] = null;
-			$data["leave"] = false;
+			$data["leave"] = 0;
 			$commend = 'curl https://api.telegram.org/bot' . $C['token'] . '/sendMessage -d "chat_id=' . $chat_id . '&text=' . urlencode("感謝您使用本機器人，當您輸入[[頁面名]]或{{模板名}}時，機器人將會自動回覆連結") . '"';
 			system($commend);
 
