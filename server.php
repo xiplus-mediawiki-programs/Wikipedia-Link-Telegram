@@ -523,7 +523,7 @@ if ($method == 'POST') {
 			$commend = 'curl https://api.telegram.org/bot' . $C['token'] . '/sendMessage -d "chat_id=' . $chat_id . '&text=' . urlencode("感謝您使用本機器人，當您輸入[[頁面名]]或{{模板名}}時，機器人將會自動回覆連結") . '"';
 			system($commend);
 
-			WriteLog($sourcetext, "add");
+			WriteLog('', 'add');
 		}
 	}
 
