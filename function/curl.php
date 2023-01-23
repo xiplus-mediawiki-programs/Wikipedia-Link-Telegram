@@ -1,5 +1,7 @@
 <?php
-function cURL($url, $post = null, $header = array()) {
+
+function cURL($url, $post = null, $header = array())
+{
 	global $C;
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);

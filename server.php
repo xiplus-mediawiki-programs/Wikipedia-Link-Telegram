@@ -1,4 +1,5 @@
 <?php
+
 set_time_limit(60);
 $starttime = microtime(true);
 require_once __DIR__ . '/config/config.default.php';
@@ -57,7 +58,7 @@ if ($method == 'POST') {
 
 		if (isset($input['message']['text'])) {
 			$text = $input['message']['text'];
-		} else if (isset($input['message']['caption'])) {
+		} elseif (isset($input['message']['caption'])) {
 			$text = $input['message']['caption'];
 		} else {
 			$text = "";
@@ -88,7 +89,7 @@ if ($method == 'POST') {
 						WriteLog($sourcetext . "\n" . $text, "cmdadminonly_pff");
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/start") || $cmd === "/start@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/start") || $cmd === "/start@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 					WriteLog($sourcetext . "\n" . $text, "start_denied");
@@ -97,11 +98,11 @@ if ($method == 'POST') {
 					$response = "已啟用連結回覆";
 					WriteLog($sourcetext . "\n" . $text, "start");
 				}
-			} else if (($chat_id > 0 && $cmd === "/stop") || $cmd === "/stop@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/stop") || $cmd === "/stop@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 					WriteLog($sourcetext . "\n" . $text, "stop_denied");
-				} else if ($chat_id < 0) {
+				} elseif ($chat_id < 0) {
 					if ($data["mode"] !== "stop") {
 						$data["stoptime"] = $nowtimestr;
 					}
@@ -116,7 +117,7 @@ if ($method == 'POST') {
 					$response = "已停用連結回覆";
 					WriteLog($sourcetext . "\n" . $text, "stop");
 				}
-			} else if (($chat_id > 0 && $cmd === "/optin") || $cmd === "/optin@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/optin") || $cmd === "/optin@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 					WriteLog($sourcetext . "\n" . $text, "optin_denied");
@@ -141,7 +142,7 @@ if ($method == 'POST') {
 						}
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/optout") || $cmd === "/optout@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/optout") || $cmd === "/optout@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 					WriteLog($sourcetext . "\n" . $text, "optout_denied");
@@ -166,7 +167,7 @@ if ($method == 'POST') {
 						}
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/settings") || $cmd === "/settings@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/settings") || $cmd === "/settings@WikipediaLinkBot") {
 				$response = "chat id為" . $chat_id . ($data['noautoleave'] ? "（不退出白名單）" : "");
 				$response .= "\n連結回覆設定為" . $data["mode"];
 				if (in_array($data["mode"], ["optin", "optout"])) {
@@ -180,7 +181,7 @@ if ($method == 'POST') {
 				}
 				$response .= "\n使用 /help 查看更改設定的指令";
 				WriteLog($sourcetext . "\n" . $text, "settings");
-			} else if (($chat_id > 0 && $cmd === "/404") || $cmd === "/404@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/404") || $cmd === "/404@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 					WriteLog($sourcetext . "\n" . $text, "404_denied");
@@ -194,7 +195,7 @@ if ($method == 'POST') {
 						WriteLog($sourcetext . "\n" . $text, "404_off");
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/pagepreview") || $cmd === "/pagepreview@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/pagepreview") || $cmd === "/pagepreview@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更回覆設定\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 					WriteLog($sourcetext . "\n" . $text, "pagepreview_denied");
@@ -208,7 +209,7 @@ if ($method == 'POST') {
 						WriteLog($sourcetext . "\n" . $text, "pagepreview_off");
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/articlepath") || $cmd === "/articlepath@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/articlepath") || $cmd === "/articlepath@WikipediaLinkBot") {
 				if ($chat_id < 0 && $data["cmdadminonly"] && !$isadmin) {
 					$response = "只有群組管理員可以變更文章路徑\n群組管理員可使用指令 /cmdadminonly@WikipediaLinkBot 取消此限制";
 					WriteLog($sourcetext . "\n" . $text, "articlepath_denied");
@@ -227,7 +228,7 @@ if ($method == 'POST') {
 						WriteLog($sourcetext . "\n" . $text, "articlepath");
 					}
 				}
-			} else if ($chat_id < 0 && $cmd === "/noautoleave@WikipediaLinkBot") {
+			} elseif ($chat_id < 0 && $cmd === "/noautoleave@WikipediaLinkBot") {
 				if (!in_array($user_id, $C['operator'])) {
 					$response = "只有機器人操作者可以變更此設定";
 					WriteLog($sourcetext . "\n" . $text, "noautoleave_denied");
@@ -241,7 +242,7 @@ if ($method == 'POST') {
 						WriteLog($sourcetext . "\n" . $text, "noautoleave_off");
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/help") || ($cmd === "/help@WikipediaLinkBot" && !in_array($chat_id, $C['notreplyhelplist']))) {
+			} elseif (($chat_id > 0 && $cmd === "/help") || ($cmd === "/help@WikipediaLinkBot" && !in_array($chat_id, $C['notreplyhelplist']))) {
 				$response = "/settings 檢視連結回覆設定\n" .
 					"/start 啟用所有連結回覆\n" .
 					"/stop 停用所有連結回覆\n" .
@@ -254,7 +255,7 @@ if ($method == 'POST') {
 					$response .= "/cmdadminonly 調整是否只有管理員才可變更設定\n";
 				}
 				WriteLog($sourcetext . "\n" . $text, "help");
-			} else if (($chat_id > 0 && $cmd === "/editcount") || $cmd === "/editcount@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/editcount") || $cmd === "/editcount@WikipediaLinkBot") {
 				WriteLog($sourcetext . "\n" . $text, "editcount");
 
 				$arg = trim($arg);
@@ -307,7 +308,7 @@ if ($method == 'POST') {
 						}
 					}
 				}
-			} else if (($chat_id > 0 && $cmd === "/whatis") || $cmd === "/whatis@WikipediaLinkBot") {
+			} elseif (($chat_id > 0 && $cmd === "/whatis") || $cmd === "/whatis@WikipediaLinkBot") {
 				$articlepath = $data["articlepath"];
 				$arg = trim($arg);
 				if ($arg === "") {
@@ -346,7 +347,7 @@ if ($method == 'POST') {
 				$spendtime = (microtime(true) - $starttime);
 				WriteLog($sourcetext . "\n" . $response . "\n" . $spendtime, "response");
 			}
-		} else if ($data["mode"] == "stop") {
+		} elseif ($data["mode"] == "stop") {
 			if (time() - strtotime($data["stoptime"]) > $C['stoplimit'] && !$data['noautoleave']) {
 				$data["leave"] = 1;
 				$commend = 'curl https://api.telegram.org/bot' . $C['token'] . '/sendMessage -d "chat_id=' . $chat_id . '&text=' . urlencode("因為停用回覆過久，機器人將自動退出以節省伺服器資源，欲再使用請重新加入機器人") . '"';
@@ -356,11 +357,11 @@ if ($method == 'POST') {
 
 				WriteLog($sourcetext . "\n" . $text, "leave");
 			}
-		} else if ($data["mode"] == "optin" && !preg_match($data["regex"], $text)) {
+		} elseif ($data["mode"] == "optin" && !preg_match($data["regex"], $text)) {
 			// pass
-		} else if ($data["mode"] == "optout" && preg_match($data["regex"], $text)) {
+		} elseif ($data["mode"] == "optout" && preg_match($data["regex"], $text)) {
 			// pass
-		} else if (preg_match_all("/(\[\[([^\[\]])+?]]|{{([^{}]+?)}})/", $text, $m)) {
+		} elseif (preg_match_all("/(\[\[([^\[\]])+?]]|{{([^{}]+?)}})/", $text, $m)) {
 			WriteLog($sourcetext . "\n" . $text, "request");
 
 			$data["lastuse"] = $nowtimestr;
@@ -383,59 +384,59 @@ if ($method == 'POST') {
 					$page = preg_replace("/:$/i", "%3A", $page);
 					$page = preg_replace("/!$/i", "%21", $page);
 					$page = preg_replace("/\?$/i", "%3F", $page);
-				} else if (preg_match("/^{{ *#(exer|if|ifeq|ifexist|ifexpr|switch|time|language|babel|invoke) *:/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *#(exer|if|ifeq|ifexist|ifexpr|switch|time|language|babel|invoke) *:/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:解析器函数";
 					$section = $m2[1];
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?(?:CURRENTYEAR|CURRENTMONTH|CURRENTMONTHNAME|CURRENTMONTHNAMEGEN|CURRENTMONTHABBREV|CURRENTDAY|CURRENTDAY2|CURRENTDOW|CURRENTDAYNAME|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|LOCALYEAR|LOCALMONTH|LOCALMONTHNAME|LOCALMONTHNAMEGEN|LOCALMONTHABBREV|LOCALDAY|LOCALDAY2|LOCALDOW|LOCALDAYNAME|LOCALTIME|LOCALHOUR|LOCALWEEK|LOCALTIMESTAMP) .*}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?(?:CURRENTYEAR|CURRENTMONTH|CURRENTMONTHNAME|CURRENTMONTHNAMEGEN|CURRENTMONTHABBREV|CURRENTDAY|CURRENTDAY2|CURRENTDOW|CURRENTDAYNAME|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|LOCALYEAR|LOCALMONTH|LOCALMONTHNAME|LOCALMONTHNAMEGEN|LOCALMONTHABBREV|LOCALDAY|LOCALDAY2|LOCALDOW|LOCALDAYNAME|LOCALTIME|LOCALHOUR|LOCALWEEK|LOCALTIMESTAMP) .*}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "日期与时间";
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?(?:SITENAME|SERVER|SERVERNAME|DIRMARK|DIRECTIONMARK|SCRIPTPATH|CURRENTVERSION|CONTENTLANGUAGE|CONTENTLANG) .*}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?(?:SITENAME|SERVER|SERVERNAME|DIRMARK|DIRECTIONMARK|SCRIPTPATH|CURRENTVERSION|CONTENTLANGUAGE|CONTENTLANG) .*}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "技术元数据";
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?(?:REVISIONID|REVISIONDAY|REVISIONDAY2|REVISIONMONTH|REVISIONYEAR|REVISIONTIMESTAMP|REVISIONUSER|PAGESIZE|PROTECTIONLEVEL|DISPLAYTITLE|DEFAULTSORT|DEFAULTSORTKEY|DEFAULTCATEGORYSORT)(:.+?)?}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?(?:REVISIONID|REVISIONDAY|REVISIONDAY2|REVISIONMONTH|REVISIONYEAR|REVISIONTIMESTAMP|REVISIONUSER|PAGESIZE|PROTECTIONLEVEL|DISPLAYTITLE|DEFAULTSORT|DEFAULTSORTKEY|DEFAULTCATEGORYSORT)(:.+?)?}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "技术元数据";
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?(?:NUMBEROFPAGES|NUMBEROFARTICLES|NUMBEROFFILES|NUMBEROFEDITS|NUMBEROFVIEWS|NUMBEROFUSERS|NUMBEROFADMINS|NUMBEROFACTIVEUSERS|PAGESINCATEGORY|PAGESINCAT|PAGESINCATEGORY|PAGESINCATEGORY|PAGESINCATEGORY|PAGESINCATEGORY|NUMBERINGROUP|NUMBERINGROUP|PAGESINNS|PAGESINNAMESPACE)([:|].+?)?}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?(?:NUMBEROFPAGES|NUMBEROFARTICLES|NUMBEROFFILES|NUMBEROFEDITS|NUMBEROFVIEWS|NUMBEROFUSERS|NUMBEROFADMINS|NUMBEROFACTIVEUSERS|PAGESINCATEGORY|PAGESINCAT|PAGESINCATEGORY|PAGESINCATEGORY|PAGESINCATEGORY|PAGESINCATEGORY|NUMBERINGROUP|NUMBERINGROUP|PAGESINNS|PAGESINNAMESPACE)([:|].+?)?}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "统计";
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?(?:FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|FULLPAGENAMEE|PAGENAMEE|BASEPAGENAMEE|SUBPAGENAMEE|SUBJECTPAGENAMEE|TALKPAGENAMEE)(:.+?)?}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?(?:FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|FULLPAGENAMEE|PAGENAMEE|BASEPAGENAMEE|SUBPAGENAMEE|SUBJECTPAGENAMEE|TALKPAGENAMEE)(:.+?)?}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "页面标题";
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?(?:NAMESPACE|SUBJECTSPACE|ARTICLESPACE|TALKSPACE|NAMESPACEE|SUBJECTSPACEE|TALKSPACEE)(:.+?)?}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?(?:NAMESPACE|SUBJECTSPACE|ARTICLESPACE|TALKSPACE|NAMESPACEE|SUBJECTSPACEE|TALKSPACEE)(:.+?)?}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "命名空间";
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?(?:NAMESPACE|SUBJECTSPACE|ARTICLESPACE|TALKSPACE|NAMESPACEE|SUBJECTSPACEE|TALKSPACEE)(:.+?)?}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?(?:NAMESPACE|SUBJECTSPACE|ARTICLESPACE|TALKSPACE|NAMESPACEE|SUBJECTSPACEE|TALKSPACEE)(:.+?)?}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "命名空间";
-				} else if (preg_match("/^{{ *! *}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *! *}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "其他";
-				} else if (preg_match("/^{{ *(localurl|fullurl|filepath|urlencode|anchorencode):.+}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(localurl|fullurl|filepath|urlencode|anchorencode):.+}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "URL数据";
-				} else if (preg_match("/^{{ *(localurl|fullurl|filepath|urlencode|anchorencode):.+}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(localurl|fullurl|filepath|urlencode|anchorencode):.+}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "命名空间_2";
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?(lc|lcfirst|uc|ucfirst|formatnum|#dateformat|#formatdate|padleft|padright|plural):.+}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?(lc|lcfirst|uc|ucfirst|formatnum|#dateformat|#formatdate|padleft|padright|plural):.+}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "格式";
-				} else if (preg_match("/^{{ *(int|#special|#tag|gender|PAGEID|noexternallanglinks)(:.+)?}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(int|#special|#tag|gender|PAGEID|noexternallanglinks)(:.+)?}}$/", $temp, $m2)) {
 					$prefix = "";
 					$page = "Help:魔术字";
 					$section = "杂项";
-				} else if (preg_match("/^{{ *(?:subst:|safesubst:)?([^|]+)(?:|.+)?}}$/", $temp, $m2)) {
+				} elseif (preg_match("/^{{ *(?:subst:|safesubst:)?([^|]+)(?:|.+)?}}$/", $temp, $m2)) {
 					$prefix = "Template:";
 					$page = trim($m2[1]);
 					$section = "";
@@ -468,9 +469,9 @@ if ($method == 'POST') {
 
 			if ($rawres === false) {
 				WriteLog($sourcetext . ' no res', 'response_failed');
-			} else if (!$res['ok']) {
+			} elseif (!$res['ok']) {
 				WriteLog($sourcetext . ' ' . $rawres, 'response_failed');
-			} else if ($res["ok"] && $data["404"]) {
+			} elseif ($res["ok"] && $data["404"]) {
 				$message_id = $res["result"]["message_id"];
 				$response = [];
 				$cnt = 0;
@@ -514,7 +515,7 @@ if ($method == 'POST') {
 				WriteLog($sourcetext . "\n" . $text, "leave");
 			}
 		}
-	} else if (isset($input['message']['new_chat_member'])) {
+	} elseif (isset($input['message']['new_chat_member'])) {
 		if (isset($input['message']['new_chat_member']['username'])
 			&& $input['message']['new_chat_member']['username'] == $C['bot_username']) {
 			$data["lastuse"] = $nowtimestr;

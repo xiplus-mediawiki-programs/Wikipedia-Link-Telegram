@@ -1,4 +1,5 @@
 <?php
+
 require __DIR__ . "/../config/config.default.php";
 
 $action = $argv[1] ?? "get";

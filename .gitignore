@@ -1,2 +1,4 @@
 config/config.php
 data/
+vendor/
+.php-cs-fixer.cache

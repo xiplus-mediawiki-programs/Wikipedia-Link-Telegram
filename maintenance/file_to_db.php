@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/../config/config.default.php';
 
 $list = [];
@@ -31,8 +32,8 @@ foreach ($list as $chatid => $data) {
 	echo $data['404'] . "\t";
 	echo $data['cmdadminonly'] . "\t";
 	echo $data['articlepath'] . "\t";
-	echo (isset($data['lastuse']) ? date("Y-m-d H:i:s", $data['lastuse']) : 0) . "\t";
-	echo (isset($data['stoptime']) ? date("Y-m-d H:i:s", $data['stoptime']) : 0) . "\t";
+	echo(isset($data['lastuse']) ? date("Y-m-d H:i:s", $data['lastuse']) : 0) . "\t";
+	echo(isset($data['stoptime']) ? date("Y-m-d H:i:s", $data['stoptime']) : 0) . "\t";
 	echo $data['pagepreview'] ?? 0 . "\t";
 	echo $data['leave'] ?? 0 . "\t";
 	echo "\n";

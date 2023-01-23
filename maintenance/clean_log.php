@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/../config/config.default.php';
 
 $limit = date('Y-m-d H:i:s', time() - $C['logkeep']);
