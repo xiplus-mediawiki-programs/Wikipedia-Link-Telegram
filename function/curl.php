@@ -6,7 +6,7 @@ function cURL($url, $post = null, $header = array())
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);
 	if (is_array($post)) {
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post));
 	}
 
