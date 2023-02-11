@@ -436,11 +436,12 @@ if ($method == 'POST') {
 					$prefix = '';
 					$page = 'Help:魔术字';
 					$section = '杂项';
-				} elseif (preg_match('/^{{ *(?:subst:|safesubst:)?([^|]+)(?:|.+)?}}$/', $temp, $m2)) {
+				} elseif (preg_match('/^{{ *(?:subst:|safesubst:)?([^|\n]+)(?:|[\s\S]+)?}}$/', $temp, $m2)) {
 					$prefix = 'Template:';
 					$page = trim($m2[1]);
 					$section = '';
 				} else {
+					WriteLog($temp, 'parse_failed');
 					continue;
 				}
 				$url = mediawikiurlencode($articlepath, $prefix . $page, $section);
